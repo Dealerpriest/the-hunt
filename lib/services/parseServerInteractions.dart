@@ -78,6 +78,7 @@ Future<ParseObject> createGameSession(String name) async {
   ParseUser user = await ParseUser.currentUser();
   ParseObject gameSession = ParseObject('GameSession')
     ..set('name', name)
+    ..set('prey', user)
     ..set('owner', user);
     // ..set('participants', ParseRelation());
   try{
@@ -242,13 +243,13 @@ void sendLocationToParse(LocationData location, ParseObject gameSession, ParseUs
   print(location);
   ParseGeoPoint pos = ParseGeoPoint(latitude: location.latitude, longitude: location.longitude);
   ParseObject loc = ParseObject("Location")
+    ..set('gameSession', gameSession)
+    ..set('coords', pos)
+    ..set('accuracy', location.accuracy)
     ..set('heading', location.heading)
     ..set('speed', location.speed)
     ..set('speedAccuracy', location.speedAccuracy)
-    ..set('accuracy', location.accuracy)
-    ..set('coords', pos)
-    ..set('user', user)
-    ..set('gameSession', gameSession);
+    ..set('user', user);
 
   loc.save();
 }
@@ -257,8 +258,7 @@ Future<List<dynamic>> fetchLocationsForGameSession(
     String gameSessionId, bool hunters) async {
   QueryBuilder<ParseObject> playerQuery =
       QueryBuilder<ParseObject>(ParseObject('_User'))
-        ..whereRelatedTo('participants', 'GameSession', gameSessionId)
-        ..whereEqualTo('isHunter', hunters);
+        ..whereRelatedTo('participants', 'GameSession', gameSessionId);
 
   // QueryBuilder<ParseObject> sessionQuery =
   //   QueryBuilder<ParseObject>(ParseObject('GameSession'))

@@ -23,6 +23,12 @@ mixin _$GameSession on _GameSession, Store {
           Computed<List<String>>(() => super.allPlayerNames,
               name: '_GameSession.allPlayerNames'))
       .value;
+  Computed<ParseUser> _$preyComputed;
+
+  @override
+  ParseUser get prey => (_$preyComputed ??=
+          Computed<ParseUser>(() => super.prey, name: '_GameSession.prey'))
+      .value;
 
   final _$sessionNameAvailableAtom =
       Atom(name: '_GameSession.sessionNameAvailable');
@@ -118,6 +124,19 @@ mixin _$GameSession on _GameSession, Store {
     return _$fetchPlayersAsyncAction.run(() => super.fetchPlayers());
   }
 
+  final _$_GameSessionActionController = ActionController(name: '_GameSession');
+
+  @override
+  Future<void> setAdmin(ParseUser user) {
+    final _$actionInfo = _$_GameSessionActionController.startAction(
+        name: '_GameSession.setAdmin');
+    try {
+      return super.setAdmin(user);
+    } finally {
+      _$_GameSessionActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
@@ -126,7 +145,8 @@ parseGameSession: ${parseGameSession},
 parsePlayers: ${parsePlayers},
 locations: ${locations},
 sessionName: ${sessionName},
-allPlayerNames: ${allPlayerNames}
+allPlayerNames: ${allPlayerNames},
+prey: ${prey}
     ''';
   }
 }

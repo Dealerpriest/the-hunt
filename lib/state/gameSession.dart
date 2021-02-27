@@ -55,6 +55,13 @@ abstract class _GameSession with Store {
     return all;
   }
 
+  @computed
+  ParseUser get prey {
+    if(parseGameSession == null || !parseGameSession.containsKey('prey'))
+      return null;
+    return this.parseGameSession.get('prey') as ParseUser;
+  }
+
   @observable
   ObservableList<ParseObject> locations = new ObservableList<ParseObject>();
 
@@ -78,6 +85,12 @@ abstract class _GameSession with Store {
     }catch (err){
       Future.error(err);
     }
+  }
+
+  @action
+  Future<void> setAdmin (ParseUser user){
+    print('Setting admin to user: ' + user.toString());
+    // TODO: actually implement this. remember to also remove user from participants.
   }
 
   @action

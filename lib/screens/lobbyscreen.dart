@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:learning_flutter/state/mainStore.dart';
@@ -27,7 +28,9 @@ class LobbyScreen extends StatelessWidget {
     final appState = Provider.of<MainStore>(ctx);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lobby'),
+        title: RichText(text: 
+          TextSpan(text: 'Lobby', 
+            recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () => appState.gameSession.setAdmin(appState.user.currentUser))),
       ),
       body: Center(
         child: Container(
@@ -36,14 +39,14 @@ class LobbyScreen extends StatelessWidget {
             children: <Widget>[
               ListTile(
                       title: Text('Player'),
-                      trailing: Text('Hunter'),
+                      trailing: Text('Prey'),
                     ),
               Expanded(
                 child: Observer(builder: (_) => ListView(
                   children: 
-                  appState.gameSession.allPlayerNames.map((playerName) => ListTile(
-                        title: Text(playerName),
-                        trailing: Switch(value: true, onChanged: (value) => value = !value),
+                  appState.gameSession.parsePlayers.map((player) => ListTile(
+                        title: Text(player.get('playerName')),
+                        trailing: Radio(groupValue: appState.gameSession.prey.objectId, value: player.objectId,),
                       )).toList()
                   // List.generate(15, (idx) => ListTile(
                   //       title: Text('Player $idx'),
@@ -80,20 +83,3 @@ class LobbyScreen extends StatelessWidget {
     );
   }
 }
-
-
-// Old hedawr of playerlist (put inside a row widget...):
-// children: <Widget>[
-//                         Text(
-//                           "Player name",
-//                           style: TextStyle(
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                         Text(
-//                           "Hunter/Prey",
-//                           style: TextStyle(
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
