@@ -65,13 +65,13 @@ mixin _$GameSession on _GameSession, Store {
   final _$parsePlayersAtom = Atom(name: '_GameSession.parsePlayers');
 
   @override
-  ObservableList<ParseObject> get parsePlayers {
+  ObservableList<ParseUser> get parsePlayers {
     _$parsePlayersAtom.reportRead();
     return super.parsePlayers;
   }
 
   @override
-  set parsePlayers(ObservableList<ParseObject> value) {
+  set parsePlayers(ObservableList<ParseUser> value) {
     _$parsePlayersAtom.reportWrite(value, super.parsePlayers, () {
       super.parsePlayers = value;
     });
@@ -132,6 +132,17 @@ mixin _$GameSession on _GameSession, Store {
         name: '_GameSession.setAdmin');
     try {
       return super.setAdmin(user);
+    } finally {
+      _$_GameSessionActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<void> setPrey(ParseUser user) {
+    final _$actionInfo = _$_GameSessionActionController.startAction(
+        name: '_GameSession.setPrey');
+    try {
+      return super.setPrey(user);
     } finally {
       _$_GameSessionActionController.endAction(_$actionInfo);
     }

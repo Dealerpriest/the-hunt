@@ -1,4 +1,6 @@
 // import 'package:gunnars_test/data/GameModel.dart';
+// import 'package:learning_flutter/screens/gamescreen.dart';
+// import 'package:learning_flutter/state/gameSession.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -158,6 +160,24 @@ Future<ParseObject> joinGameSession(ParseObject game, String playerName, [bool a
   // }
 }
 
+Future<void> setPreyForGameSession (ParseObject gameSession, ParseUser prey) async {
+  gameSession.set('prey', prey);
+  ParseResponse apiResponse = await gameSession.save();
+  if (apiResponse.success) {
+    return;
+  }
+  return Future.error('couldn\'t save the prey to the gameSession');
+    // if(apiResponse.count > 0){
+    //   ParseObject player = apiResponse.results.first;
+    //   ParseUser current = (await ParseUser.currentUser());
+    //   if(player.objectId != current.objectId){
+    //     return Future.value(false);
+    //   }
+    // }
+    // // print("playername $playerName is available: ${available}");
+    // return Future.value(true);
+}
+
 Future<bool> isGameNameAvailable(String value) async {
   print("Is game name $value available?");
   QueryBuilder<ParseObject> query =
@@ -212,16 +232,16 @@ Future<String> fetchAllGameSessions() async {
   return Future.error('no result');
 }
 
-Future<List<ParseObject>> fetchPlayersForGameSession(String gameSessionId) async {
-  QueryBuilder<ParseObject> playerQuery =
-      QueryBuilder<ParseObject>(ParseObject('_User'))
+Future<List<ParseUser>> fetchPlayersForGameSession(String gameSessionId) async {
+  QueryBuilder<ParseUser> playerQuery =
+      QueryBuilder<ParseUser>(ParseObject('_User') as ParseUser)
         ..whereRelatedTo('participants', 'GameSession', gameSessionId);
 
   var apiResponse = await playerQuery.query();
 
   if (apiResponse.success) {
     // print(apiResponse.results);
-    return Future.value(apiResponse.results as List<ParseObject>);
+    return Future.value(apiResponse.results as List<ParseUser>);
   }
   return Future.error('no result');
 }

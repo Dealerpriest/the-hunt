@@ -39,7 +39,7 @@ abstract class _GameSession with Store {
   }
 
   @observable
-  ObservableList<ParseObject> parsePlayers = new ObservableList<ParseObject>();
+  ObservableList<ParseUser> parsePlayers = new ObservableList<ParseUser>();
 
   @computed
   List<String> get allPlayerNames{
@@ -89,8 +89,15 @@ abstract class _GameSession with Store {
 
   @action
   Future<void> setAdmin (ParseUser user){
-    print('Setting admin to user: ' + user.toString());
+    print('Calling placeholder setAdmin function');
+    print('supposed to set this user as admin:' + user.toString());
     // TODO: actually implement this. remember to also remove user from participants.
+  }
+
+  @action
+  Future<void> setPrey (ParseUser user) {
+    print(user.runtimeType );
+    return setPreyForGameSession(this.parseGameSession, user);
   }
 
   @action

@@ -46,7 +46,13 @@ class LobbyScreen extends StatelessWidget {
                   children: 
                   appState.gameSession.parsePlayers.map((player) => ListTile(
                         title: Text(player.get('playerName')),
-                        trailing: Radio(groupValue: appState.gameSession.prey.objectId, value: player.objectId,),
+                        trailing: Radio(
+                          groupValue: appState.gameSession.prey.objectId, 
+                          value: player.objectId,
+                          onChanged: (value){
+                            // appState.gameSession.setPrey(player);
+                            // print(player.runtimeType);
+                          },),
                       )).toList()
                   // List.generate(15, (idx) => ListTile(
                   //       title: Text('Player $idx'),
