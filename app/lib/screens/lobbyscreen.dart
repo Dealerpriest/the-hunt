@@ -7,20 +7,20 @@ import 'package:provider/provider.dart';
 
 class LobbyScreen extends StatelessWidget {
 
-  Widget listItem(player){
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(player),
-        Switch(
-          value: true,
-          onChanged: (value) {
-            print('switched');
-          },
-        ),
-      ],
-    );
-    }
+  // Widget listItem(player){
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: <Widget>[
+  //       Text(player),
+  //       Switch(
+  //         value: true,
+  //         onChanged: (value) {
+  //           print('switched');
+  //         },
+  //       ),
+  //     ],
+  //   );
+  //   }
 
   @override
   Widget build(BuildContext ctx) {
@@ -28,9 +28,12 @@ class LobbyScreen extends StatelessWidget {
     final appState = Provider.of<MainStore>(ctx);
     return Scaffold(
       appBar: AppBar(
-        title: RichText(text: 
-          TextSpan(text: 'Lobby', 
+        title: 
+        Observer( builder: (ctx) => 
+        RichText(text: 
+          TextSpan(text: appState.gameSession.sessionName, 
             recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () => appState.gameSession.setAdmin(appState.user.currentUser))),
+            )
       ),
       body: Center(
         child: Container(
@@ -50,7 +53,7 @@ class LobbyScreen extends StatelessWidget {
                           groupValue: appState.gameSession.prey.objectId, 
                           value: player.objectId,
                           onChanged: (value){
-                            // appState.gameSession.setPrey(player);
+                            appState.gameSession.setPrey(player);
                             // print(player.runtimeType);
                           },),
                       )).toList()

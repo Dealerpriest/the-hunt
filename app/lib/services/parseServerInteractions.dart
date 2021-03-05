@@ -234,14 +234,15 @@ Future<String> fetchAllGameSessions() async {
 
 Future<List<ParseUser>> fetchPlayersForGameSession(String gameSessionId) async {
   QueryBuilder<ParseUser> playerQuery =
-      QueryBuilder<ParseUser>(ParseObject('_User') as ParseUser)
+      QueryBuilder<ParseUser>(ParseUser.forQuery())
         ..whereRelatedTo('participants', 'GameSession', gameSessionId);
 
   var apiResponse = await playerQuery.query();
 
   if (apiResponse.success) {
     // print(apiResponse.results);
-    return Future.value(apiResponse.results as List<ParseUser>);
+    // print('apiRsponse.result type: ${apiResponse.results.runtimeType}');
+    return Future.value(apiResponse.results.cast<ParseUser>());
   }
   return Future.error('no result');
 }

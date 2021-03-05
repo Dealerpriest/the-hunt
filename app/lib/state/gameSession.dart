@@ -110,6 +110,7 @@ abstract class _GameSession with Store {
   @action
   Future<void> fetchPlayers() async {
     this.parsePlayers =  (await fetchPlayersForGameSession(this.parseGameSession.objectId)).asObservable();
+    // print('parsePlayers type: ' + this.parsePlayers.runtimeType.toString());
   }
 
   Future<void> _startGameSubscription() async{
