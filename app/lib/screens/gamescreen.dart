@@ -20,7 +20,7 @@ class GameScreen extends StatelessWidget {
     () async {
       ParseUser user = await ParseUser.currentUser();
       locationService.startStream(appState.gameSession.parseGameSession, user);
-      appState.gameSession.startLocationSubscription();
+      appState.map.startLocationSubscription();
     }();
 
     return Scaffold(
@@ -40,7 +40,7 @@ class GameScreen extends StatelessWidget {
         FloatingActionButton(child: Icon(Icons.remove), onPressed: () => appState.map.clearAllMarkers(), heroTag: null,),
         ],),
       persistentFooterButtons: [
-        Observer(builder: (_) => Text('locations: ${appState.gameSession.locations.length.toString()}, markers: ${appState.map.markers.length.toString()}'),)
+        Observer(builder: (_) => Text('elapsed: ${appState.gameSession.elapsedGameTime}, locations: ${appState.map.locations.length.toString()}, markers: ${appState.map.markers.length.toString()}'),)
       ],
     );
   }

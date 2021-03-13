@@ -10,6 +10,7 @@ part 'map.g.dart';
 
 class Map = _Map with _$Map;
 
+Subscription locationSubscription;
 abstract class _Map with Store {
   _Map({this.parent});
   MainStore parent;
@@ -18,12 +19,21 @@ abstract class _Map with Store {
 
   static LatLng defaultPos = LatLng(57.708870, 11.974560);
 
-  // @observable
-  // ObservableSet<Marker> markers = ObservableSet<Marker>.of([Marker(markerId: MarkerId('marker123'), position: defaultPos)]);
+  @observable
+  ObservableList<ParseObject> locations = new ObservableList<ParseObject>();
+
+  
+  
+  @computed
+  ObservableList<ParseObject> get preyLocations {
+    return locations.where((location) {
+      return location.get<ParseUser>('user').objectId == parent.gameSession.prey.objectId;
+    }).toList().asObservable();
+  }
 
   @computed
   ObservableSet<Marker> get markers {
-    return parent.gameSession.locations.map<Marker>((location){
+    return locations.map<Marker>((location){
       ParseUser userOfLocation = location.get<ParseUser>('user');
       bool isMe = parent.user.currentUser.objectId == userOfLocation.objectId;
       BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
@@ -51,6 +61,18 @@ abstract class _Map with Store {
   @action
   clearAllMarkers() async {
     this.markers.clear();
+  }
+
+  Future<void> startLocationSubscription() async {
+    print('STARTING LOCATION SUBSCRIPTION');
+    if(locationSubscription != null){
+      stopSubscription(locationSubscription);
+    }
+    locationSubscription = await subscribeToLocationsForGamesession(this.parent.gameSession.parseGameSession);
+      locationSubscription.on(LiveQueryEvent.create, (value) async {
+        print('new location received from parse!!');
+        this.locations.add(value as ParseObject);
+      });
   }
   
   

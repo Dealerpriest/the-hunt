@@ -29,11 +29,12 @@ class LobbyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: 
-        Observer( builder: (ctx) => 
-        RichText(text: 
-          TextSpan(text: appState.gameSession.sessionName, 
-            recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () => appState.gameSession.setAdmin(appState.user.currentUser))),
-            )
+        Observer( builder: (ctx){
+          String hostText = appState.gameSession.isGameHost ? ', you are host':'';
+          return RichText(text: 
+            TextSpan(text: '${appState.gameSession.sessionName}${hostText}', 
+              recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () => appState.gameSession.setAdmin(appState.user.currentUser)));
+        })
       ),
       body: Center(
         child: Container(
@@ -52,10 +53,10 @@ class LobbyScreen extends StatelessWidget {
                         trailing: Radio(
                           groupValue: appState.gameSession.prey.objectId, 
                           value: player.objectId,
-                          onChanged: (value){
+                          onChanged: appState.gameSession.isGameHost ? (value){
                             appState.gameSession.setPrey(player);
                             // print(player.runtimeType);
-                          },),
+                          } : null,),
                       )).toList()
                   // List.generate(15, (idx) => ListTile(
                   //       title: Text('Player $idx'),
@@ -78,7 +79,8 @@ class LobbyScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       child: Text('Start the hunt!'),
-                      onPressed: () {
+                      onPressed: () async {
+                        await appState.gameSession.startGame();
                         Navigator.pushReplacementNamed(ctx, '/game');
                       },
                     ),

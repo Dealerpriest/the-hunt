@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
+import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
@@ -9,12 +10,12 @@ part 'gameSession.g.dart';
 class GameSession = _GameSession with _$GameSession;
 
 Subscription gameSessionSubscription;
-Subscription locationSubscription;
 
 abstract class _GameSession with Store {
   _GameSession({this.parent});
-  var parent;
+  MainStore parent;
   
+  Stream _gameTimer = null;
   // @observable
   // String playerName = '';
   
@@ -27,6 +28,9 @@ abstract class _GameSession with Store {
   @observable
   ParseObject parseGameSession;
 
+  @observable
+  ObservableStream<int> elapsedGameTime;
+
   @computed
   String get sessionName {
     // if(parseGameSession?.get('name')??true){
@@ -36,6 +40,18 @@ abstract class _GameSession with Store {
     var name = parseGameSession?.get('name')??'';
     print('game Session name: '+ name);
     return name;
+  }
+
+  @computed
+  ParseUser get gameHost {
+    if(parseGameSession == null || !parseGameSession.containsKey('owner'))
+      return null;
+    return parseGameSession.get<ParseUser>('owner');
+  }
+
+  @computed
+  bool get isGameHost {
+    return parent.user.currentUser.objectId == this.gameHost.objectId;
   }
 
   @observable
@@ -62,8 +78,10 @@ abstract class _GameSession with Store {
     return this.parseGameSession.get('prey') as ParseUser;
   }
 
-  @observable
-  ObservableList<ParseObject> locations = new ObservableList<ParseObject>();
+  @computed
+  bool get isPrey {
+    return parent.user.currentUser.objectId == this.prey.objectId;
+  }
 
   @action
   checkSessionNameAvailable(String sessionName) async {
@@ -96,7 +114,7 @@ abstract class _GameSession with Store {
 
   @action
   Future<void> setPrey (ParseUser user) {
-    print(user.runtimeType );
+    // print(user.runtimeType );
     return setPreyForGameSession(this.parseGameSession, user);
   }
 
@@ -113,6 +131,21 @@ abstract class _GameSession with Store {
     // print('parsePlayers type: ' + this.parsePlayers.runtimeType.toString());
   }
 
+  int updateGameTimer(counter) {
+    print('_gameTimer updated');
+    return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt')).inSeconds;
+  }
+
+  @action
+  Future<void> startGame() async {
+    parseGameSession.set<DateTime>('startedAt', DateTime.now());
+    var result = parseGameSession.save();
+    _gameTimer = Stream.periodic(Duration(seconds: 1), updateGameTimer);
+    elapsedGameTime = _gameTimer.asObservable();
+    return result;
+    // if(response)
+  }
+
   Future<void> _startGameSubscription() async{
     if(gameSessionSubscription != null){
       stopSubscription(gameSessionSubscription);
@@ -122,18 +155,6 @@ abstract class _GameSession with Store {
         // print('gamSession updated!!!: ' + value);
         this.parseGameSession = (value as ParseObject);
         await this.fetchPlayers();
-      });
-  }
-
-  Future<void> startLocationSubscription() async {
-    print('STARTING LOCATION SUBSCRIPTION');
-    if(locationSubscription != null){
-      stopSubscription(locationSubscription);
-    }
-    locationSubscription = await subscribeToLocationsForGamesession(this.parseGameSession);
-      locationSubscription.on(LiveQueryEvent.create, (value) async {
-        print('new location received from parse!!');
-        this.locations.add(value as ParseObject);
       });
   }
 }

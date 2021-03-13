@@ -16,6 +16,20 @@ mixin _$GameSession on _GameSession, Store {
       (_$sessionNameComputed ??= Computed<String>(() => super.sessionName,
               name: '_GameSession.sessionName'))
           .value;
+  Computed<ParseUser> _$gameHostComputed;
+
+  @override
+  ParseUser get gameHost =>
+      (_$gameHostComputed ??= Computed<ParseUser>(() => super.gameHost,
+              name: '_GameSession.gameHost'))
+          .value;
+  Computed<bool> _$isGameHostComputed;
+
+  @override
+  bool get isGameHost =>
+      (_$isGameHostComputed ??= Computed<bool>(() => super.isGameHost,
+              name: '_GameSession.isGameHost'))
+          .value;
   Computed<List<String>> _$allPlayerNamesComputed;
 
   @override
@@ -28,6 +42,12 @@ mixin _$GameSession on _GameSession, Store {
   @override
   ParseUser get prey => (_$preyComputed ??=
           Computed<ParseUser>(() => super.prey, name: '_GameSession.prey'))
+      .value;
+  Computed<bool> _$isPreyComputed;
+
+  @override
+  bool get isPrey => (_$isPreyComputed ??=
+          Computed<bool>(() => super.isPrey, name: '_GameSession.isPrey'))
       .value;
 
   final _$sessionNameAvailableAtom =
@@ -62,6 +82,21 @@ mixin _$GameSession on _GameSession, Store {
     });
   }
 
+  final _$elapsedGameTimeAtom = Atom(name: '_GameSession.elapsedGameTime');
+
+  @override
+  ObservableStream<int> get elapsedGameTime {
+    _$elapsedGameTimeAtom.reportRead();
+    return super.elapsedGameTime;
+  }
+
+  @override
+  set elapsedGameTime(ObservableStream<int> value) {
+    _$elapsedGameTimeAtom.reportWrite(value, super.elapsedGameTime, () {
+      super.elapsedGameTime = value;
+    });
+  }
+
   final _$parsePlayersAtom = Atom(name: '_GameSession.parsePlayers');
 
   @override
@@ -74,21 +109,6 @@ mixin _$GameSession on _GameSession, Store {
   set parsePlayers(ObservableList<ParseUser> value) {
     _$parsePlayersAtom.reportWrite(value, super.parsePlayers, () {
       super.parsePlayers = value;
-    });
-  }
-
-  final _$locationsAtom = Atom(name: '_GameSession.locations');
-
-  @override
-  ObservableList<ParseObject> get locations {
-    _$locationsAtom.reportRead();
-    return super.locations;
-  }
-
-  @override
-  set locations(ObservableList<ParseObject> value) {
-    _$locationsAtom.reportWrite(value, super.locations, () {
-      super.locations = value;
     });
   }
 
@@ -124,6 +144,13 @@ mixin _$GameSession on _GameSession, Store {
     return _$fetchPlayersAsyncAction.run(() => super.fetchPlayers());
   }
 
+  final _$startGameAsyncAction = AsyncAction('_GameSession.startGame');
+
+  @override
+  Future<void> startGame() {
+    return _$startGameAsyncAction.run(() => super.startGame());
+  }
+
   final _$_GameSessionActionController = ActionController(name: '_GameSession');
 
   @override
@@ -153,11 +180,14 @@ mixin _$GameSession on _GameSession, Store {
     return '''
 sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
+elapsedGameTime: ${elapsedGameTime},
 parsePlayers: ${parsePlayers},
-locations: ${locations},
 sessionName: ${sessionName},
+gameHost: ${gameHost},
+isGameHost: ${isGameHost},
 allPlayerNames: ${allPlayerNames},
-prey: ${prey}
+prey: ${prey},
+isPrey: ${isPrey}
     ''';
   }
 }
