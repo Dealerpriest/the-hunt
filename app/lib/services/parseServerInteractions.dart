@@ -275,38 +275,40 @@ void sendLocationToParse(LocationData location, ParseObject gameSession, ParseUs
   loc.save();
 }
 
-Future<List<dynamic>> fetchLocationsForGameSession(
-    String gameSessionId, bool hunters) async {
-  QueryBuilder<ParseObject> playerQuery =
-      QueryBuilder<ParseObject>(ParseObject('_User'))
-        ..whereRelatedTo('participants', 'GameSession', gameSessionId);
+Future<void> updateRevealStateForLocation(ParseObject loc, revealed) async {
+  // print("sending location to parse!!");
+  // print(location);
+  // ParseGeoPoint pos = ParseGeoPoint(latitude: location.latitude, longitude: location.longitude);
+  // ParseObject loc = ParseObject("Location")
+  //   ..set('gameSession', gameSession)
+  //   ..set('coords', pos)
+  //   ..set('accuracy', location.accuracy)
+  //   ..set('heading', location.heading)
+  //   ..set('speed', location.speed)
+  //   ..set('speedAccuracy', location.speedAccuracy)
+  //   ..set('user', user);
 
-  // QueryBuilder<ParseObject> sessionQuery =
-  //   QueryBuilder<ParseObject>(ParseObject('GameSession'))
-  //     ..whereEqualTo('objectId', 'RVpzsL3tST');
+  loc.set<bool>('revealed', revealed);
 
-  QueryBuilder<ParseObject> queryBuilder =
+  await loc.save();
+}
+
+Future<List<ParseObject>> fetchLocationsForGamesession(ParseObject gameSession) async {
+  QueryBuilder<ParseObject> locationQuery =
       QueryBuilder<ParseObject>(ParseObject('Location'))
-        ..whereEqualTo('visibleByDefault', true)
-        ..whereMatchesQuery('player', playerQuery);
+        ..whereEqualTo('gameSession', gameSession);
 
-  // var apiResponse = await queryBuilder.query();
-  var apiResponse = await queryBuilder.query();
-
-  // var apiResponse = await ParseObject('Locations').;
-
-  if (apiResponse.success && apiResponse.count > 0) {
-    print("\\\\\\\\\\\\\\");
-    print(apiResponse.count);
-
-    return apiResponse.results;
+  ParseResponse response = await locationQuery.query();
+  if(response.success){
+    return response.results;
   }
-
-  return Future.error('no result');
+  
+  return Future.error('no result when trying to fetch locations');
+  // final LiveQuery liveQuery = LiveQuery();
+  // return liveQuery.client.subscribe(locationQuery);
 }
 
 Future<Subscription> subscribeToLocationsForGamesession(ParseObject gameSession) {
-  print('Not implemented yet: location subscription');
   QueryBuilder<ParseObject> locationQuery =
       QueryBuilder<ParseObject>(ParseObject('Location'))
         ..whereEqualTo('gameSession', gameSession);

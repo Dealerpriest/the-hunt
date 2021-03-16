@@ -22,7 +22,12 @@ abstract class _Map with Store {
   @observable
   ObservableList<ParseObject> locations = new ObservableList<ParseObject>();
 
-  
+  @computed
+  ObservableList<ParseObject> get myLocations {
+    return locations.where((location) {
+      return location.get<ParseUser>('user').objectId == parent.user.currentUser.objectId;
+    }).toList().asObservable();
+  }
   
   @computed
   ObservableList<ParseObject> get preyLocations {
@@ -33,7 +38,7 @@ abstract class _Map with Store {
 
   @computed
   ObservableSet<Marker> get markers {
-    return locations.map<Marker>((location){
+    return preyLocations.map<Marker>((location){
       ParseUser userOfLocation = location.get<ParseUser>('user');
       bool isMe = parent.user.currentUser.objectId == userOfLocation.objectId;
       BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
@@ -63,16 +68,46 @@ abstract class _Map with Store {
     this.markers.clear();
   }
 
+  @action
+  clearAllLocations() async {
+    this.locations.clear();
+  }
+
+  @action
+  revealMostRecentLocation() async {
+    updateRevealStateForLocation(myLocations.last, true);
+  }
+
+  @action
+  fetchAllLocations() async {
+    print('fetching all locations');
+    var list = await fetchLocationsForGamesession(parent.gameSession.parseGameSession);
+    print(list);
+    if(list != null){
+      this.locations = list.asObservable();
+    }
+  }
+
   Future<void> startLocationSubscription() async {
     print('STARTING LOCATION SUBSCRIPTION');
     if(locationSubscription != null){
       stopSubscription(locationSubscription);
     }
     locationSubscription = await subscribeToLocationsForGamesession(this.parent.gameSession.parseGameSession);
-      locationSubscription.on(LiveQueryEvent.create, (value) async {
-        print('new location received from parse!!');
-        this.locations.add(value as ParseObject);
-      });
+    locationSubscription.on(LiveQueryEvent.create, (value) async {
+      print('new location received from parse!!');
+      this.locations.add(value as ParseObject);
+    });
+    locationSubscription.on(LiveQueryEvent.update, (value) async {
+      print('updated location received from parse!!');
+      print(value);
+      ParseObject updatedLoc = value as ParseObject;
+      var idx = locations.indexWhere((location) => updatedLoc.objectId == location.objectId);
+      if(idx > 0){
+        locations[idx] = updatedLoc;
+      }
+      // this.locations.add(value as ParseObject);
+    });
   }
   
   

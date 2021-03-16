@@ -72,18 +72,35 @@ class LobbyScreen extends StatelessWidget {
                   children: <Widget>[
                     OutlinedButton(
                       // style: Theme.of(ctx).e,
-                      child: const Text('Cancel'),
+                      child: const Text('Leave'),
                       onPressed: () {
                         Navigator.pushReplacementNamed(ctx, '/');
                       },
                     ),
-                    ElevatedButton(
-                      child: Text('Start the hunt!'),
-                      onPressed: () async {
-                        await appState.gameSession.startGame();
-                        Navigator.pushReplacementNamed(ctx, '/game');
-                      },
-                    ),
+                    Observer(builder: (_){
+                      if(appState.gameSession.isGameHost){
+                        return ElevatedButton(
+                          child: Text('Start the hunt!'),
+                          onPressed: () async {
+                            await appState.gameSession.startGame();
+                            Navigator.pushReplacementNamed(ctx, '/game');
+                          },
+                        );
+                      }else{
+                        if(appState.gameSession.gameStarted){
+                          return ElevatedButton(
+                            child: Text('Enter the hunt!'),
+                            onPressed: () async {
+                              await appState.gameSession.startGame();
+                              appState.gameSession.enterGame();
+                              Navigator.pushReplacementNamed(ctx, '/game');
+                            },
+                          );
+                        }else{
+                          return Container(width: 0, height: 0,);
+                        }
+                      }
+                    }),
                   ],
                 ),
               ),

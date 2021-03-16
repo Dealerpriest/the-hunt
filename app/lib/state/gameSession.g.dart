@@ -9,12 +9,40 @@ part of 'gameSession.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$GameSession on _GameSession, Store {
+  Computed<ObservableList<DateTime>> _$revealMomentsComputed;
+
+  @override
+  ObservableList<DateTime> get revealMoments => (_$revealMomentsComputed ??=
+          Computed<ObservableList<DateTime>>(() => super.revealMoments,
+              name: '_GameSession.revealMoments'))
+      .value;
+  Computed<Duration> _$durationTillNextRevealComputed;
+
+  @override
+  Duration get durationTillNextReveal => (_$durationTillNextRevealComputed ??=
+          Computed<Duration>(() => super.durationTillNextReveal,
+              name: '_GameSession.durationTillNextReveal'))
+      .value;
   Computed<String> _$sessionNameComputed;
 
   @override
   String get sessionName =>
       (_$sessionNameComputed ??= Computed<String>(() => super.sessionName,
               name: '_GameSession.sessionName'))
+          .value;
+  Computed<DateTime> _$gameStartTimeComputed;
+
+  @override
+  DateTime get gameStartTime =>
+      (_$gameStartTimeComputed ??= Computed<DateTime>(() => super.gameStartTime,
+              name: '_GameSession.gameStartTime'))
+          .value;
+  Computed<dynamic> _$gameStartedComputed;
+
+  @override
+  dynamic get gameStarted =>
+      (_$gameStartedComputed ??= Computed<dynamic>(() => super.gameStarted,
+              name: '_GameSession.gameStarted'))
           .value;
   Computed<ParseUser> _$gameHostComputed;
 
@@ -85,13 +113,13 @@ mixin _$GameSession on _GameSession, Store {
   final _$elapsedGameTimeAtom = Atom(name: '_GameSession.elapsedGameTime');
 
   @override
-  ObservableStream<int> get elapsedGameTime {
+  ObservableStream<Duration> get elapsedGameTime {
     _$elapsedGameTimeAtom.reportRead();
     return super.elapsedGameTime;
   }
 
   @override
-  set elapsedGameTime(ObservableStream<int> value) {
+  set elapsedGameTime(ObservableStream<Duration> value) {
     _$elapsedGameTimeAtom.reportWrite(value, super.elapsedGameTime, () {
       super.elapsedGameTime = value;
     });
@@ -151,6 +179,13 @@ mixin _$GameSession on _GameSession, Store {
     return _$startGameAsyncAction.run(() => super.startGame());
   }
 
+  final _$enterGameAsyncAction = AsyncAction('_GameSession.enterGame');
+
+  @override
+  Future enterGame() {
+    return _$enterGameAsyncAction.run(() => super.enterGame());
+  }
+
   final _$_GameSessionActionController = ActionController(name: '_GameSession');
 
   @override
@@ -182,7 +217,11 @@ sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
 elapsedGameTime: ${elapsedGameTime},
 parsePlayers: ${parsePlayers},
+revealMoments: ${revealMoments},
+durationTillNextReveal: ${durationTillNextReveal},
 sessionName: ${sessionName},
+gameStartTime: ${gameStartTime},
+gameStarted: ${gameStarted},
 gameHost: ${gameHost},
 isGameHost: ${isGameHost},
 allPlayerNames: ${allPlayerNames},

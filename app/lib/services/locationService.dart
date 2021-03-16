@@ -48,7 +48,7 @@ class LocationService {
       }
     }
 
-    _location.changeSettings(accuracy: LocationAccuracy.high, interval: 10000);
+    _location.changeSettings(accuracy: LocationAccuracy.high, interval: 60000);
     _location.enableBackgroundMode(enable: true);
   }
 
