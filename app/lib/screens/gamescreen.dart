@@ -45,7 +45,8 @@ class GameScreen extends StatelessWidget {
           reveal in: ${appState.gameSession.durationTillNextReveal.inSeconds} 
           elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds},
           locations: ${appState.map.locations.length.toString()}, 
-          markers: ${appState.map.markers.length.toString()}
+          revealedlocations: ${appState.map.revealedPreyLocations.length.toString()}
+          markers: ${appState.map.markers.length.toString()},
         '''
         ),)
       ],

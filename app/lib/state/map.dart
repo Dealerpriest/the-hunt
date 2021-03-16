@@ -36,9 +36,13 @@ abstract class _Map with Store {
     }).toList().asObservable();
   }
 
+  ObservableList<ParseObject> get revealedPreyLocations {
+    return preyLocations.where((location) => location.get<bool>('revealed')).toList().asObservable();
+  }
+
   @computed
   ObservableSet<Marker> get markers {
-    return preyLocations.map<Marker>((location){
+    return revealedPreyLocations.map<Marker>((location){
       ParseUser userOfLocation = location.get<ParseUser>('user');
       bool isMe = parent.user.currentUser.objectId == userOfLocation.objectId;
       BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
