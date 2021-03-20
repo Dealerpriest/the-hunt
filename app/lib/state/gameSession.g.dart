@@ -9,13 +9,6 @@ part of 'gameSession.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$GameSession on _GameSession, Store {
-  Computed<ObservableList<DateTime>> _$revealMomentsComputed;
-
-  @override
-  ObservableList<DateTime> get revealMoments => (_$revealMomentsComputed ??=
-          Computed<ObservableList<DateTime>>(() => super.revealMoments,
-              name: '_GameSession.revealMoments'))
-      .value;
   Computed<Duration> _$durationTillNextRevealComputed;
 
   @override
@@ -217,7 +210,6 @@ sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
 elapsedGameTime: ${elapsedGameTime},
 parsePlayers: ${parsePlayers},
-revealMoments: ${revealMoments},
 durationTillNextReveal: ${durationTillNextReveal},
 sessionName: ${sessionName},
 gameStartTime: ${gameStartTime},

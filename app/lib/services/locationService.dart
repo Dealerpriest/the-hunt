@@ -1,11 +1,9 @@
 import 'dart:developer';
 
 import 'package:learning_flutter/services/parseServerInteractions.dart';
+import './revealService.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
-
-
-
 class LocationService {
   /// SINGLETON PATTERN
   static LocationService _instance;
@@ -27,6 +25,8 @@ class LocationService {
   bool _serviceEnabled;
   PermissionStatus _permissionGranted;
   bool _streamStarted = false;
+  Duration _interval = Duration(seconds: 10);
+  LocationAccuracy _accuracy = LocationAccuracy.high;
 
   _init() async {
     
@@ -48,8 +48,17 @@ class LocationService {
       }
     }
 
-    _location.changeSettings(accuracy: LocationAccuracy.high, interval: 60000);
+    _location.changeSettings(accuracy: _accuracy, interval: _interval.inMilliseconds);
     _location.enableBackgroundMode(enable: true);
+  }
+
+  void set locationInterval(Duration interval) {
+    _interval = interval;
+    _location.changeSettings(interval: _interval.inMilliseconds);
+  }
+
+  Duration get locationInterval {
+    return _interval;
   }
 
   startStream(ParseObject gameSession, ParseUser user){
@@ -60,10 +69,27 @@ class LocationService {
     _location.onLocationChanged.listen((LocationData currentLocation) {
       print('location updated');
       // print(currentLocation);
+      print('shouldReveal:' + _shouldBeRevealed().toString());
       sendLocationToParse(currentLocation, gameSession, user);
     });
     _streamStarted = true;
     print('location stream started!!!');
+  }
+
+  _shouldBeRevealed(){
+    DateTime now = DateTime.now();
+    return RevealService().revealMoments.any((revealMoment) {
+      if(!now.isBefore(revealMoment)){
+        return false;
+      }
+      if(revealMoment.difference(now) > _interval){
+        return true;
+      }
+      return false;
+    });
+    // RevealService().revealMoments.firstWhere((revealMoment){
+
+    // }, orElse: () => )
   }
 
 

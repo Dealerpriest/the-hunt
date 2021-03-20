@@ -110,7 +110,6 @@ abstract class _Map with Store {
       if(idx > 0){
         locations[idx] = updatedLoc;
       }
-      // this.locations.add(value as ParseObject);
     });
   }
   

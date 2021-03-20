@@ -8,7 +8,32 @@ import 'map.dart';
 
 part 'mainStore.g.dart';
 
-class MainStore = _MainStore with _$MainStore;
+// class MainStore = _MainStore with _$MainStore;
+class MainStore extends _MainStore with _$MainStore { 
+  static MainStore _instance; 
+  static MainStore getInstance() { 
+    if (_instance == null) { 
+      _instance = new MainStore(); 
+    }
+    
+    return _instance;
+  }
+
+
+  // static MainStore _instance;
+  
+
+  // MainStore._internal(){
+  //   this._init();
+  // }
+
+  // factory MainStore() {
+  //   if (_instance == null) {
+  //     _instance = MainStore._internal();
+  //   }
+  //   return _instance;
+  // }
+}
 
 abstract class _MainStore with Store {
 

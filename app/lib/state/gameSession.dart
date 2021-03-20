@@ -7,6 +7,8 @@ import 'package:mobx/mobx.dart';
 
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
+import '../services/revealService.dart';
+
 part 'gameSession.g.dart';
 
 class GameSession = _GameSession with _$GameSession;
@@ -37,31 +39,32 @@ abstract class _GameSession with Store {
   @observable
   ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
 
-  @computed
-  ObservableList<DateTime> get revealMoments{
-    if(gameStartTime == null){
-      return ObservableList<DateTime>();
-    }
-    DateTime startTime = gameStartTime;
-    List<DateTime> list = new List<DateTime>();
-    for(int i = 0; i < 30; i++){
-      DateTime revealMoment = startTime.add(Duration(seconds: 30*(i+1)));
-      list.add(revealMoment);
-    }
-    return list.asObservable();
-  }
+  // @computed
+  // ObservableList<DateTime> get revealMoments{
+  //   if(gameStartTime == null){
+  //     return ObservableList<DateTime>();
+  //   }
+  //   DateTime startTime = gameStartTime;
+  //   List<DateTime> list = new List<DateTime>();
+  //   for(int i = 0; i < 100; i++){
+  //     DateTime revealMoment = startTime.add(Duration(seconds: 40*(i+1)));
+  //     list.add(revealMoment);
+  //   }
+  //   return list.asObservable();
+  // }
 
   @computed
   Duration get durationTillNextReveal {
-    try {
-      int elapsed = elapsedGameTime.value.inSeconds;
-      DateTime now = DateTime.now();
-      DateTime nextReveal = revealMoments.firstWhere((revealMoment) => now.isBefore(revealMoment), orElse: () =>  DateTime.now());
-      return nextReveal.difference(now);
-    } catch (err){
-      log('error', error: err);
-      return Duration.zero;
-    }
+    // try {
+    //   int elapsed = elapsedGameTime.value.inSeconds;
+    //   DateTime now = DateTime.now();
+    //   DateTime nextReveal = revealMoments.firstWhere((revealMoment) => now.isBefore(revealMoment), orElse: () =>  DateTime.now());
+    //   return nextReveal.difference(now);
+    // } catch (err){
+    //   log('error', error: err);
+    //   return Duration.zero;
+    // }
+    return Duration.zero;
   }
 
   @computed
@@ -177,7 +180,7 @@ abstract class _GameSession with Store {
     // print('parsePlayers type: ' + this.parsePlayers.runtimeType.toString());
   }
 
-  void setupRevealTimerReaction(){
+  void _setupRevealTimerReaction(){
     _disposeRevealTimerReaction = reaction(
       (_) => durationTillNextReveal, (Duration duration) async {
         if(duration.inSeconds == 0) {
@@ -198,9 +201,9 @@ abstract class _GameSession with Store {
   @action enterGame() async {
     await parent.map.fetchAllLocations();
     await parent.map.startLocationSubscription();
-    if(isPrey){
-      setupRevealTimerReaction();
-    }
+    // if(isPrey){
+    //   _setupRevealTimerReaction();
+    // }
     print('enter game called and finished');
   }
 
@@ -209,6 +212,7 @@ abstract class _GameSession with Store {
       return null != parseGameSession.get<DateTime>('startedAt');
     }, (){
       print('Game was started');
+      RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50));
       // onGameStartedReaction();
       elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {
       return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));

@@ -33,15 +33,9 @@ class MainWidget extends StatelessWidget {
     
     Wakelock.enable();
 
-    return MultiProvider(
-      providers: [
-        Provider<MainStore>(create: (_){
-          MainStore store = MainStore();
-          store.user.initUser();
-          return store;
-        },)
-      ],
-      child: MaterialApp(
+    MainStore.getInstance().user.initUser();
+
+    return MaterialApp(
         title: 'All makt åt tengil!',
         theme: ThemeData.dark(),
         home: StartScreen(),
@@ -51,7 +45,31 @@ class MainWidget extends StatelessWidget {
           '/test': (_) => TestScreen(),
           '/game': (_) => GameScreen(),
         },
-      )
-    );
+      );
+
+    // return MultiProvider(
+    //   providers: [
+    //     Provider<MainStore>(create: (_){
+    //       // MainStore store = MainStore();
+    //       // store.user.initUser();
+    //       // return store;
+
+    //       MainStore store = MainStore.getInstance();
+    //       store.user.initUser();
+    //       return store;
+    //     },)
+    //   ],
+    //   child: MaterialApp(
+    //     title: 'All makt åt tengil!',
+    //     theme: ThemeData.dark(),
+    //     home: StartScreen(),
+    //     routes: <String, WidgetBuilder>{
+    //       '/start': (_) => StartScreen(),
+    //       '/lobby': (_) => LobbyScreen(),
+    //       '/test': (_) => TestScreen(),
+    //       '/game': (_) => GameScreen(),
+    //     },
+    //   )
+    // );
   }
 }

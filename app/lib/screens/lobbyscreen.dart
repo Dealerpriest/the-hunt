@@ -25,7 +25,8 @@ class LobbyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     
-    final appState = Provider.of<MainStore>(ctx);
+    // final appState = Provider.of<MainStore>(ctx);
+    MainStore appState = MainStore.getInstance();
     return Scaffold(
       appBar: AppBar(
         title: 

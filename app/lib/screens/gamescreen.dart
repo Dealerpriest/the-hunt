@@ -13,7 +13,8 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    final appState = Provider.of<MainStore>(ctx);
+    // final appState = Provider.of<MainStore>(ctx);
+    MainStore appState = MainStore.getInstance();
 
     final mapService = MapService();
     final locationService =  LocationService();

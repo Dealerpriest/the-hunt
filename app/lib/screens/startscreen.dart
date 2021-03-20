@@ -4,60 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 // import 'package:learning_flutter/state/gameSession.dart';
 import 'package:learning_flutter/state/mainStore.dart';
-import 'package:provider/provider.dart';
-// import 'package:flutter_mobx/flutter_mobx.dart';
-// import '../state/GameModel.dart';
-// import 'package:gunnars_test/main.dart';
-
-// import '../services/parseServerInteractions.dart';
 // import 'package:provider/provider.dart';
 
-// class StartScreen extends StatefulWidget {
-//   @override
-//   State<StartScreen> createState() => StartScreenState();
-// }
-
 class StartScreen extends StatelessWidget {
-  // ONLY UI STATE HERE!!!!
-  // bool _gameNameAvailable = false;
-  // bool _playerNameAvailable = false;
-  // String _gameName = "";
-  // String _playerName = "";
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   createUserCredentailsFromHardware().then((Map<String, String> credentials) {
-  //     initParse(credentials["userId"], credentials["userPassword"]).then((_) {
-  //       // getAllGameSessions().then((gameSessionsString) {
-  //       //   _gameSessionName = gameSessionsString;
-  //       // });
-  //     });
-  //   });
-  // }
-
-  // void _onClickHostGame(GameModel state) async {
-  //   try {
-  //     await createGameSession(_gameName);
-  //     await joinGameSession(_gameName, _playerName);
-  //     state.gameState = GameState.lobby;
-  //     state.myPlayer = Player(name: _playerName);
-  //     state.addPlayerToGameSession(state.myPlayer);
-
-  //     Navigator.pushReplacementNamed(context, '/lobby');
-  //   } catch (error) {
-  //     print("fuck you!!");
-  //     print(error);
-  //   }
-  // }
-
-  // void _onClickJoinGame(GameModel state) async {
-  //   await joinGameSession(_gameName, _playerName);
-  //   state.gameState = GameState.lobby;
-  //   state.myPlayer = Player(name: _playerName);
-  //   state.addPlayerToGameSession(state.myPlayer);
-  //   Navigator.pushReplacementNamed(context, '/lobby');
-  // }
 
   String gameName = '';
   String playerName = '';
@@ -65,7 +14,8 @@ class StartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    final appState = Provider.of<MainStore>(ctx);
+    // final appState = Provider.of<MainStore>(ctx);
+    final MainStore appState = MainStore.getInstance();
     return Scaffold(
       body: Center(
         child: Container(
