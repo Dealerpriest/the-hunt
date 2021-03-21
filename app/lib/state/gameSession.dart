@@ -211,7 +211,7 @@ abstract class _GameSession with Store {
     when((_){
       return null != parseGameSession.get<DateTime>('startedAt');
     }, (){
-      print('Game was started');
+      print('====================>>    Game was started');
       RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50));
       // onGameStartedReaction();
       elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {

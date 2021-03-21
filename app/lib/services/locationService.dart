@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:learning_flutter/services/parseServerInteractions.dart';
+import '../state/mainStore.dart';
 import './revealService.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
@@ -27,6 +28,8 @@ class LocationService {
   bool _streamStarted = false;
   Duration _interval = Duration(seconds: 10);
   LocationAccuracy _accuracy = LocationAccuracy.high;
+
+  DateTime _lastUsedRevealMoment = DateTime.now();
 
   _init() async {
     
@@ -69,30 +72,39 @@ class LocationService {
     _location.onLocationChanged.listen((LocationData currentLocation) {
       print('location updated');
       // print(currentLocation);
-      print('shouldReveal:' + _shouldBeRevealed().toString());
-      sendLocationToParse(currentLocation, gameSession, user);
+      // print('shouldReveal:  ${_shouldBeRevealed()}');
+      var shouldReveal = _shouldBeRevealed(_lastUsedRevealMoment);
+      if(shouldReveal){
+        _lastUsedRevealMoment = RevealService().nextRevealMoment;
+      }
+      sendLocationToParse(currentLocation, gameSession, user, shouldReveal);
     });
     _streamStarted = true;
     print('location stream started!!!');
   }
 
-  _shouldBeRevealed(){
+  bool _shouldBeRevealed(DateTime lastUsedReveal){
+    // Don't reveal hunters
+    if(!MainStore.getInstance().gameSession.isPrey){
+      return false;
+    }
     DateTime now = DateTime.now();
-    return RevealService().revealMoments.any((revealMoment) {
-      if(!now.isBefore(revealMoment)){
+    DateTime nextReveal = RevealService().nextRevealMoment;
+    if(nextReveal == null){
+      log('error', error: 'couldnt get nextRevealMoment');
+      return true;
+    }
+    Duration untilNextReveal = nextReveal.difference(now);
+    print('untilNextReveal: ${untilNextReveal.inSeconds}');
+    print('interval: ${_interval.inSeconds}');
+    if(untilNextReveal < _interval){
+      // Only one reveal per revealMoment!
+      if(nextReveal.isAtSameMomentAs(lastUsedReveal)){
+        print('gonna reveal this location');
         return false;
       }
-      if(revealMoment.difference(now) > _interval){
-        return true;
-      }
-      return false;
-    });
-    // RevealService().revealMoments.firstWhere((revealMoment){
-
-    // }, orElse: () => )
+      return true;
+    }
+    return false;
   }
-
-
-  // _locationData = await location.getLocation();
-
 }

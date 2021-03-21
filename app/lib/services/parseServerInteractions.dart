@@ -259,18 +259,19 @@ Future<Subscription> subscribeToGameSession(ParseObject gameSession){
   return liveQuery.client.subscribe(gameSessionQuery);
 }
 
-void sendLocationToParse(LocationData location, ParseObject gameSession, ParseUser user) {
+void sendLocationToParse(LocationData location, ParseObject gameSession, ParseUser user, [bool revealed = false]) {
   print("sending location to parse!!");
   print(location);
   ParseGeoPoint pos = ParseGeoPoint(latitude: location.latitude, longitude: location.longitude);
   ParseObject loc = ParseObject("Location")
-    ..set('gameSession', gameSession)
-    ..set('coords', pos)
+    ..set<ParseObject>('gameSession', gameSession)
+    ..set<ParseGeoPoint>('coords', pos)
     ..set('accuracy', location.accuracy)
     ..set('heading', location.heading)
     ..set('speed', location.speed)
     ..set('speedAccuracy', location.speedAccuracy)
-    ..set('user', user);
+    ..set('user', user)
+    ..set('revealed', revealed);
 
   loc.save();
 }

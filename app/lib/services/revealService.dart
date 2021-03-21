@@ -1,4 +1,6 @@
+import 'dart:developer';
 
+import 'package:sorted_list/sorted_list.dart';
 
 
 class RevealService {
@@ -18,7 +20,8 @@ class RevealService {
   }
   //// END SINGLETON PATTERN
   
-  List<DateTime> _revealMoments = List<DateTime>();
+  SortedList<DateTime> _revealMoments = SortedList<DateTime>((a, b) => a.compareTo(b));
+  // List<DateTime> _revealMoments = List<DateTime>();
 
   _init(){
     // Do we need to init something?? Don't think so!
@@ -33,12 +36,27 @@ class RevealService {
     return _revealMoments;
   }
 
-  void setRevealMomentsFromStartAndInterval(DateTime startTime, Duration interval, {int nrOfReveals = 100}){
+  DateTime get nextRevealMoment {
+    try{
+      return _revealMoments.firstWhere((revealMoment) => DateTime.now().isBefore(revealMoment));
+    } catch(err) {
+      log('error', error: err);
+      print('probably have run out of revealMoments');
+      return null;
+    }
+  }
+
+  void setRevealMomentsFromStartAndInterval(DateTime startTime, Duration interval, [int nrOfReveals = 100]){
+    print('Setting revealMoment!');
     // List<DateTime> list = new List<DateTime>();
     _revealMoments.clear();
     for(int i = 0; i < nrOfReveals; i++){
       DateTime revealMoment = startTime.add(interval * (i+1));
       _revealMoments.add(revealMoment);
+    }
+    print('nr of set revealMoments: ${_revealMoments.length}');
+    for(DateTime dt in _revealMoments){
+      print(dt.toString());
     }
   }
 }
