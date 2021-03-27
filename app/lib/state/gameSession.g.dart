@@ -9,12 +9,19 @@ part of 'gameSession.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$GameSession on _GameSession, Store {
-  Computed<Duration> _$durationTillNextRevealComputed;
+  Computed<Duration> _$durationUntilNextRevealComputed;
 
   @override
-  Duration get durationTillNextReveal => (_$durationTillNextRevealComputed ??=
-          Computed<Duration>(() => super.durationTillNextReveal,
-              name: '_GameSession.durationTillNextReveal'))
+  Duration get durationUntilNextReveal => (_$durationUntilNextRevealComputed ??=
+          Computed<Duration>(() => super.durationUntilNextReveal,
+              name: '_GameSession.durationUntilNextReveal'))
+      .value;
+  Computed<int> _$nrOfRevealsFromTimerComputed;
+
+  @override
+  int get nrOfRevealsFromTimer => (_$nrOfRevealsFromTimerComputed ??=
+          Computed<int>(() => super.nrOfRevealsFromTimer,
+              name: '_GameSession.nrOfRevealsFromTimer'))
       .value;
   Computed<String> _$sessionNameComputed;
 
@@ -69,6 +76,12 @@ mixin _$GameSession on _GameSession, Store {
   @override
   bool get isPrey => (_$isPreyComputed ??=
           Computed<bool>(() => super.isPrey, name: '_GameSession.isPrey'))
+      .value;
+  Computed<bool> _$isHunterComputed;
+
+  @override
+  bool get isHunter => (_$isHunterComputed ??=
+          Computed<bool>(() => super.isHunter, name: '_GameSession.isHunter'))
       .value;
 
   final _$sessionNameAvailableAtom =
@@ -210,7 +223,8 @@ sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
 elapsedGameTime: ${elapsedGameTime},
 parsePlayers: ${parsePlayers},
-durationTillNextReveal: ${durationTillNextReveal},
+durationUntilNextReveal: ${durationUntilNextReveal},
+nrOfRevealsFromTimer: ${nrOfRevealsFromTimer},
 sessionName: ${sessionName},
 gameStartTime: ${gameStartTime},
 gameStarted: ${gameStarted},
@@ -218,7 +232,8 @@ gameHost: ${gameHost},
 isGameHost: ${isGameHost},
 allPlayerNames: ${allPlayerNames},
 prey: ${prey},
-isPrey: ${isPrey}
+isPrey: ${isPrey},
+isHunter: ${isHunter}
     ''';
   }
 }

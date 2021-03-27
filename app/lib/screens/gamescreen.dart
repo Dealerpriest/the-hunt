@@ -13,6 +13,7 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
+    print('BUILDING GAME SCREEN!!!!!! =======================================');
     // final appState = Provider.of<MainStore>(ctx);
     MainStore appState = MainStore.getInstance();
 
@@ -20,11 +21,15 @@ class GameScreen extends StatelessWidget {
     final locationService =  LocationService();
     () async {
       ParseUser user = await ParseUser.currentUser();
+      await appState.map.fetchAllLocations();
       locationService.startStream(appState.gameSession.parseGameSession, user);
-      // appState.map.startLocationSubscription();
+
     }();
 
     return Scaffold(
+      drawer: Drawer(child: ListView(children: [
+        ListTile(title: Text('Awwww yeah!!!'),)
+      ],),),
       body: Observer(builder: (_) => 
         GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(57.708870, 11.974560), zoom: 17),
@@ -38,19 +43,32 @@ class GameScreen extends StatelessWidget {
       floatingActionButton: Column(mainAxisAlignment: MainAxisAlignment.end,  children: [
         // FloatingActionButton(child: Icon(Icons.add), onPressed: () => appState.map.generateSomeMarkers()),
         SizedBox(height: 10),
-        FloatingActionButton(child: Icon(Icons.remove), onPressed: () => appState.map.clearAllMarkers(), heroTag: null,),
+        FloatingActionButton(child: Icon(Icons.remove), onPressed: () => appState.map.clearAllLocations(), heroTag: null,),
         ],),
-      persistentFooterButtons: [
-        Observer(builder: (_) => Text(
-          '''
-          reveal in: ${appState.gameSession.durationTillNextReveal.inSeconds} 
-          elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds},
-          locations: ${appState.map.locations.length.toString()}, 
-          revealedlocations: ${appState.map.revealedPreyLocations.length.toString()}
-          markers: ${appState.map.markers.length.toString()},
-        '''
-        ),)
-      ],
+      bottomNavigationBar:
+
+      Observer(builder: (_) =>
+      Container(
+        padding: EdgeInsets.all(15),
+        child: 
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text('nr of timer reveals: ${appState.gameSession.nrOfRevealsFromTimer}'),
+            Text('latest location revealValue: ${appState.map.latestPreyLocation.get<bool>('revealed')}'),
+            Text('reveal in: ${appState.gameSession.durationUntilNextReveal.inSeconds+1}.${appState.gameSession.durationUntilNextReveal.inMilliseconds - 1000 * appState.gameSession.durationUntilNextReveal.inSeconds }'),
+            Text('elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds}'),
+            Text('locations: ${appState.map.locations.length}'),
+            Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
+            Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),
+            Text('markers: ${appState.map.markers.length}'),
+
+            
+              ],)
+      )
+        )
     );
   }
 }

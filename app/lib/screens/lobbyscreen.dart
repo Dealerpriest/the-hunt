@@ -31,9 +31,9 @@ class LobbyScreen extends StatelessWidget {
       appBar: AppBar(
         title: 
         Observer( builder: (ctx){
-          String hostText = appState.gameSession.isGameHost ? ', you are host':'';
+          String hostText = appState.gameSession.isGameHost ? ', (you are host)':'';
           return RichText(text: 
-            TextSpan(text: '${appState.gameSession.sessionName}${hostText}', 
+            TextSpan(text: 'gameName: ${appState.gameSession.sessionName}${hostText}', 
               recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () => appState.gameSession.setAdmin(appState.user.currentUser)));
         })
       ),
@@ -92,7 +92,7 @@ class LobbyScreen extends StatelessWidget {
                           return ElevatedButton(
                             child: Text('Enter the hunt!'),
                             onPressed: () async {
-                              await appState.gameSession.startGame();
+                              // await appState.gameSession.startGame();
                               appState.gameSession.enterGame();
                               Navigator.pushReplacementNamed(ctx, '/game');
                             },

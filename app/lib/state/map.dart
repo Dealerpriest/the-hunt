@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:learning_flutter/services/revealService.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -23,21 +25,48 @@ abstract class _Map with Store {
   ObservableList<ParseObject> locations = new ObservableList<ParseObject>();
 
   @computed
-  ObservableList<ParseObject> get myLocations {
+  ObservableList<ParseObject> get allMyLocations {
     return locations.where((location) {
       return location.get<ParseUser>('user').objectId == parent.user.currentUser.objectId;
     }).toList().asObservable();
   }
   
   @computed
-  ObservableList<ParseObject> get preyLocations {
+  ObservableList<ParseObject> get allPreyLocations {
     return locations.where((location) {
       return location.get<ParseUser>('user').objectId == parent.gameSession.prey.objectId;
     }).toList().asObservable();
   }
 
+  @computed
+  ParseObject get latestPreyLocation {
+    return allPreyLocations.last;
+  }
+
+  // TODO: WE probably not want to recalculate this every second.... (because one used observable is a stream)
+  @computed
   ObservableList<ParseObject> get revealedPreyLocations {
-    return preyLocations.where((location) => location.get<bool>('revealed')).toList().asObservable();
+    return allPreyLocations.where((location){
+      var untilReveal = parent.gameSession.durationUntilNextReveal;
+      bool revealed = location.get<bool>('revealed');
+      bool isNotYetTriggered = location.createdAt.isAfter(RevealService().latestRevealMoment);
+      return revealed && !isNotYetTriggered;
+    }).toList().asObservable();
+  }
+
+  @computed
+  ObservableList<ParseObject> get pendingPreyLocations {
+    return allPreyLocations.where((location){
+      var untilReveal = parent.gameSession.durationUntilNextReveal;
+      bool revealed = location.get<bool>('revealed');
+      bool isNotYetTriggered = location.createdAt.isAfter(RevealService().latestRevealMoment);
+      return revealed && isNotYetTriggered;
+    }).toList().asObservable();
+  }
+
+  @computed
+  ParseObject get latestRevealedPreyLocation {
+    return revealedPreyLocations.last;
   }
 
   @computed
@@ -68,25 +97,20 @@ abstract class _Map with Store {
   // }
 
   @action
-  clearAllMarkers() async {
-    this.markers.clear();
-  }
-
-  @action
   clearAllLocations() async {
     this.locations.clear();
   }
 
-  @action
-  revealMostRecentLocation() async {
-    updateRevealStateForLocation(myLocations.last, true);
-  }
+  // @action
+  // revealMostRecentLocation() async {
+    //   updateRevealStateForLocation(allMyLocations.last, true);
+  // }
 
   @action
   fetchAllLocations() async {
     print('fetching all locations');
     var list = await fetchLocationsForGamesession(parent.gameSession.parseGameSession);
-    print(list);
+    // print(list);
     if(list != null){
       this.locations = list.asObservable();
     }
@@ -100,6 +124,8 @@ abstract class _Map with Store {
     locationSubscription = await subscribeToLocationsForGamesession(this.parent.gameSession.parseGameSession);
     locationSubscription.on(LiveQueryEvent.create, (value) async {
       print('new location received from parse!!');
+      bool revealed = value.get<bool>('revealed');
+      print("revealed: ${revealed}");
       this.locations.add(value as ParseObject);
     });
     locationSubscription.on(LiveQueryEvent.update, (value) async {

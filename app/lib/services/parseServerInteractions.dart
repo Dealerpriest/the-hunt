@@ -36,7 +36,7 @@ Future<void> initParse(userId, userPassword) async {
       // masterKey:
       //     env['PARSE_MASTERKEY'], // Required for Back4App and others
       // clientKey: keyParseClientKey, // Required for some setups
-      debug: true, // When enabled, prints logs to console
+      debug: false, // When enabled, prints logs to console
       liveQueryUrl: parseUrl, // Required if using LiveQuery
       autoSendSessionId: true, // Required for authentication and ACL
       // securityContext: securityContext, // Again, required for some setups
@@ -93,7 +93,7 @@ Future<ParseObject> createGameSession(String name) async {
   }
 }
 
-Future<ParseObject> joinGameSessionByName(String name, String playerName, [bool asHunter = true]) async {
+Future<ParseObject> joinGameSessionByName(String name, String playerName) async {
   print('joining game Session by name: ${name}');
   QueryBuilder<ParseObject> query =
       QueryBuilder<ParseObject>(ParseObject('GameSession'))
@@ -101,12 +101,12 @@ Future<ParseObject> joinGameSessionByName(String name, String playerName, [bool 
   var resp = await query.query();
   if (resp.success) {
     ParseObject session = resp.results.first;
-    return joinGameSession(session, playerName, asHunter);
+    return joinGameSession(session, playerName);
   }
   return Future.error(resp.error);
 }
 
-Future<ParseObject> joinGameSession(ParseObject game, String playerName, [bool asHunter = true]) async {
+Future<ParseObject> joinGameSession(ParseObject game, String playerName) async {
   print('joining gameSession: ${game.objectId} as player ${playerName}');
   ParseUser user = await ParseUser.currentUser();
   if(user == null){
@@ -121,13 +121,6 @@ Future<ParseObject> joinGameSession(ParseObject game, String playerName, [bool a
 
   user.set('playerName', playerName);
   user.save();
-  // ParseObject player = ParseObject('Player')
-  //   ..set("isHunter", asHunter)
-  //   ..set("playerName", playerName)
-  //   ..set("user", user);
-  // player.save();
-
-  // game.addRelation("participants", [user]);
   ParseRelation relation = game.getRelation('participants');
   relation.add(user);
   ParseResponse response = await game.save();
@@ -135,29 +128,6 @@ Future<ParseObject> joinGameSession(ParseObject game, String playerName, [bool a
     return response.results.first;
   else
     return Future.error(response.error);
-  // ParseResponse response = await game.save();
-  // if(response.success){
-  //   return Future.value();
-  // }
-  // return Future.error('coulnt add user to gamesession participant field');
-
-
-  // QueryBuilder<ParseObject> query =
-  //     QueryBuilder<ParseObject>(ParseObject('GameSession'))
-  //       ..whereEqualTo('name', name);
-  // var resp = await query.query();
-  // if (resp.success) {
-  //   ParseObject session = resp.results[0];
-  //   ParseUser user = await ParseUser.currentUser();
-
-  //   ParseObject player = ParseObject('Player')
-  //     ..set("isHunter", asHunter)
-  //     ..set("playerName", playerName)
-  //     ..set("user", user);
-  //   player.save();
-
-  //   session.addRelation("participants", [player]);
-  // }
 }
 
 Future<void> setPreyForGameSession (ParseObject gameSession, ParseUser prey) async {
@@ -297,7 +267,8 @@ Future<void> updateRevealStateForLocation(ParseObject loc, revealed) async {
 Future<List<ParseObject>> fetchLocationsForGamesession(ParseObject gameSession) async {
   QueryBuilder<ParseObject> locationQuery =
       QueryBuilder<ParseObject>(ParseObject('Location'))
-        ..whereEqualTo('gameSession', gameSession);
+        ..whereEqualTo('gameSession', gameSession)
+        ..setLimit(15000);
 
   ParseResponse response = await locationQuery.query();
   if(response.success){
@@ -305,8 +276,6 @@ Future<List<ParseObject>> fetchLocationsForGamesession(ParseObject gameSession) 
   }
   
   return Future.error('no result when trying to fetch locations');
-  // final LiveQuery liveQuery = LiveQuery();
-  // return liveQuery.client.subscribe(locationQuery);
 }
 
 Future<Subscription> subscribeToLocationsForGamesession(ParseObject gameSession) {

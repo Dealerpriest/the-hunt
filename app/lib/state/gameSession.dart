@@ -21,14 +21,6 @@ abstract class _GameSession with Store {
 
   // ReactionDisposer _disposeStartReaction;
   ReactionDisposer _disposeRevealTimerReaction;
-  
-  
-  // Stream<int> _gameTimer = null;
-  // @observable
-  // String playerName = '';
-  
-  // @observable
-  // String sessionName = '';
 
   @observable
   bool sessionNameAvailable = false;
@@ -39,32 +31,32 @@ abstract class _GameSession with Store {
   @observable
   ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
 
-  // @computed
-  // ObservableList<DateTime> get revealMoments{
-  //   if(gameStartTime == null){
-  //     return ObservableList<DateTime>();
-  //   }
-  //   DateTime startTime = gameStartTime;
-  //   List<DateTime> list = new List<DateTime>();
-  //   for(int i = 0; i < 100; i++){
-  //     DateTime revealMoment = startTime.add(Duration(seconds: 40*(i+1)));
-  //     list.add(revealMoment);
-  //   }
-  //   return list.asObservable();
-  // }
+  @computed
+  Duration get durationUntilNextReveal {
+    try {
+      int elapsed = elapsedGameTime.value.inSeconds;
+      Duration untilReveal = RevealService().untilNextRevealMoment;
+      if(untilReveal == null){
+        return Duration.zero;
+      }
+      return untilReveal;
+      // DateTime now = DateTime.now();
+      // DateTime nextReveal = revealMoments.firstWhere((revealMoment) => now.isBefore(revealMoment), orElse: () =>  DateTime.now());
+      // return nextReveal.difference(now);
+    } catch (err){
+      log('error', error: err);
+      return Duration.zero;
+    }
+  }
+
+  int _revealTimerCounter = 0;
 
   @computed
-  Duration get durationTillNextReveal {
-    // try {
-    //   int elapsed = elapsedGameTime.value.inSeconds;
-    //   DateTime now = DateTime.now();
-    //   DateTime nextReveal = revealMoments.firstWhere((revealMoment) => now.isBefore(revealMoment), orElse: () =>  DateTime.now());
-    //   return nextReveal.difference(now);
-    // } catch (err){
-    //   log('error', error: err);
-    //   return Duration.zero;
-    // }
-    return Duration.zero;
+  int get nrOfRevealsFromTimer {
+    if(this.durationUntilNextReveal.inSeconds == 0){
+      _revealTimerCounter++;
+    }
+    return _revealTimerCounter;
   }
 
   @computed
@@ -74,7 +66,7 @@ abstract class _GameSession with Store {
     //   return '';
     // }
     var name = parseGameSession?.get('name')??'';
-    print('game Session name: '+ name);
+    // print('game Session name: '+ name);
     return name;
   }
 
@@ -128,6 +120,11 @@ abstract class _GameSession with Store {
     return parent.user.currentUser.objectId == this.prey.objectId;
   }
 
+  @computed
+  bool get isHunter {
+    return !this.isPrey;
+  }
+
   @action
   Future<void> setAdmin (ParseUser user){
     print('Calling placeholder setAdmin function');
@@ -157,7 +154,7 @@ abstract class _GameSession with Store {
       this.parseGameSession = await createGameSession(sessionName);
       _startGameSubscription();
       await joinGameSession(this.parseGameSession, playerName);
-      onGameStartedReaction();
+      setupGameStartedReaction();
       return Future.value();
     }catch (err){
       Future.error(err);
@@ -170,7 +167,7 @@ abstract class _GameSession with Store {
     this.parseGameSession = await joinGameSessionByName(sessionName, playerName);
     await _startGameSubscription();
     await this.fetchPlayers();
-    onGameStartedReaction();
+    setupGameStartedReaction();
     // setupGameStartedReaction();
   }
 
@@ -178,16 +175,6 @@ abstract class _GameSession with Store {
   Future<void> fetchPlayers() async {
     this.parsePlayers =  (await fetchPlayersForGameSession(this.parseGameSession.objectId)).asObservable();
     // print('parsePlayers type: ' + this.parsePlayers.runtimeType.toString());
-  }
-
-  void _setupRevealTimerReaction(){
-    _disposeRevealTimerReaction = reaction(
-      (_) => durationTillNextReveal, (Duration duration) async {
-        if(duration.inSeconds == 0) {
-          print('reeeeeeaveling');
-          await parent.map.revealMostRecentLocation();
-        }
-      });
   }
 
   @action
@@ -199,28 +186,21 @@ abstract class _GameSession with Store {
   }
 
   @action enterGame() async {
-    await parent.map.fetchAllLocations();
+    // await parent.map.fetchAllLocations();
     await parent.map.startLocationSubscription();
-    // if(isPrey){
-    //   _setupRevealTimerReaction();
-    // }
     print('enter game called and finished');
   }
 
-  void onGameStartedReaction() async {
+  void setupGameStartedReaction() async {
     when((_){
       return null != parseGameSession.get<DateTime>('startedAt');
     }, (){
       print('====================>>    Game was started');
-      RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50));
-      // onGameStartedReaction();
+      RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50), 250);
       elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {
       return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
     }).asObservable(initialValue: Duration.zero);
     });
-    // elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {
-    //   return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
-    // }).asObservable(initialValue: Duration.zero);
   }
 
   

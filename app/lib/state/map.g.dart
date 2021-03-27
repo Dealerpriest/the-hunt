@@ -9,20 +9,54 @@ part of 'map.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$Map on _Map, Store {
-  Computed<ObservableList<ParseObject>> _$myLocationsComputed;
+  Computed<ObservableList<ParseObject>> _$allMyLocationsComputed;
 
   @override
-  ObservableList<ParseObject> get myLocations => (_$myLocationsComputed ??=
-          Computed<ObservableList<ParseObject>>(() => super.myLocations,
-              name: '_Map.myLocations'))
-      .value;
-  Computed<ObservableList<ParseObject>> _$preyLocationsComputed;
+  ObservableList<ParseObject> get allMyLocations =>
+      (_$allMyLocationsComputed ??= Computed<ObservableList<ParseObject>>(
+              () => super.allMyLocations,
+              name: '_Map.allMyLocations'))
+          .value;
+  Computed<ObservableList<ParseObject>> _$allPreyLocationsComputed;
 
   @override
-  ObservableList<ParseObject> get preyLocations => (_$preyLocationsComputed ??=
-          Computed<ObservableList<ParseObject>>(() => super.preyLocations,
-              name: '_Map.preyLocations'))
+  ObservableList<ParseObject> get allPreyLocations =>
+      (_$allPreyLocationsComputed ??= Computed<ObservableList<ParseObject>>(
+              () => super.allPreyLocations,
+              name: '_Map.allPreyLocations'))
+          .value;
+  Computed<ParseObject> _$latestPreyLocationComputed;
+
+  @override
+  ParseObject get latestPreyLocation => (_$latestPreyLocationComputed ??=
+          Computed<ParseObject>(() => super.latestPreyLocation,
+              name: '_Map.latestPreyLocation'))
       .value;
+  Computed<ObservableList<ParseObject>> _$revealedPreyLocationsComputed;
+
+  @override
+  ObservableList<ParseObject> get revealedPreyLocations =>
+      (_$revealedPreyLocationsComputed ??=
+              Computed<ObservableList<ParseObject>>(
+                  () => super.revealedPreyLocations,
+                  name: '_Map.revealedPreyLocations'))
+          .value;
+  Computed<ObservableList<ParseObject>> _$pendingPreyLocationsComputed;
+
+  @override
+  ObservableList<ParseObject> get pendingPreyLocations =>
+      (_$pendingPreyLocationsComputed ??= Computed<ObservableList<ParseObject>>(
+              () => super.pendingPreyLocations,
+              name: '_Map.pendingPreyLocations'))
+          .value;
+  Computed<ParseObject> _$latestRevealedPreyLocationComputed;
+
+  @override
+  ParseObject get latestRevealedPreyLocation =>
+      (_$latestRevealedPreyLocationComputed ??= Computed<ParseObject>(
+              () => super.latestRevealedPreyLocation,
+              name: '_Map.latestRevealedPreyLocation'))
+          .value;
   Computed<ObservableSet<Marker>> _$markersComputed;
 
   @override
@@ -46,27 +80,11 @@ mixin _$Map on _Map, Store {
     });
   }
 
-  final _$clearAllMarkersAsyncAction = AsyncAction('_Map.clearAllMarkers');
-
-  @override
-  Future clearAllMarkers() {
-    return _$clearAllMarkersAsyncAction.run(() => super.clearAllMarkers());
-  }
-
   final _$clearAllLocationsAsyncAction = AsyncAction('_Map.clearAllLocations');
 
   @override
   Future clearAllLocations() {
     return _$clearAllLocationsAsyncAction.run(() => super.clearAllLocations());
-  }
-
-  final _$revealMostRecentLocationAsyncAction =
-      AsyncAction('_Map.revealMostRecentLocation');
-
-  @override
-  Future revealMostRecentLocation() {
-    return _$revealMostRecentLocationAsyncAction
-        .run(() => super.revealMostRecentLocation());
   }
 
   final _$fetchAllLocationsAsyncAction = AsyncAction('_Map.fetchAllLocations');
@@ -80,8 +98,12 @@ mixin _$Map on _Map, Store {
   String toString() {
     return '''
 locations: ${locations},
-myLocations: ${myLocations},
-preyLocations: ${preyLocations},
+allMyLocations: ${allMyLocations},
+allPreyLocations: ${allPreyLocations},
+latestPreyLocation: ${latestPreyLocation},
+revealedPreyLocations: ${revealedPreyLocations},
+pendingPreyLocations: ${pendingPreyLocations},
+latestRevealedPreyLocation: ${latestRevealedPreyLocation},
 markers: ${markers}
     ''';
   }

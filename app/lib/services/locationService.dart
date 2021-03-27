@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -25,6 +26,7 @@ class LocationService {
   Location _location;
   bool _serviceEnabled;
   PermissionStatus _permissionGranted;
+  StreamSubscription _locationStreamSubscription = null;
   bool _streamStarted = false;
   Duration _interval = Duration(seconds: 10);
   LocationAccuracy _accuracy = LocationAccuracy.high;
@@ -64,12 +66,22 @@ class LocationService {
     return _interval;
   }
 
+  stopStream() async {
+    if(_locationStreamSubscription == null){
+      print('tried to stop locationStreamSubscripion but no streamSubscription found.');
+      _streamStarted = false;
+      return;
+    }
+    await _locationStreamSubscription.cancel();
+    _streamStarted = false;
+  }
+
   startStream(ParseObject gameSession, ParseUser user){
     if(_streamStarted){
       log('error:', error: 'Location stream already started!');
       return;
     }
-    _location.onLocationChanged.listen((LocationData currentLocation) {
+    _locationStreamSubscription = _location.onLocationChanged.listen((LocationData currentLocation) {
       print('location updated');
       // print(currentLocation);
       // print('shouldReveal:  ${_shouldBeRevealed()}');
@@ -85,7 +97,7 @@ class LocationService {
 
   bool _shouldBeRevealed(DateTime lastUsedReveal){
     // Don't reveal hunters
-    if(!MainStore.getInstance().gameSession.isPrey){
+    if(MainStore.getInstance().gameSession.isHunter){
       return false;
     }
     DateTime now = DateTime.now();
@@ -100,9 +112,10 @@ class LocationService {
     if(untilNextReveal < _interval){
       // Only one reveal per revealMoment!
       if(nextReveal.isAtSameMomentAs(lastUsedReveal)){
-        print('gonna reveal this location');
+        print('already revealed one for the picked revealMoment');
         return false;
       }
+      print('gonna reveal this location');
       return true;
     }
     return false;

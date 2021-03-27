@@ -46,6 +46,25 @@ class RevealService {
     }
   }
 
+  DateTime get latestRevealMoment {
+    try{
+      return _revealMoments.lastWhere((revealMoment) {
+        return DateTime.now().isAfter(revealMoment);
+      });
+    } catch(err) {
+      log('error', error: err);
+      return null;
+    }
+  }
+
+  Duration get untilNextRevealMoment {
+    var nextReveal = this.nextRevealMoment;
+    if(nextReveal == null){
+      return null;
+    }
+    return nextReveal.difference(DateTime.now());
+  }
+
   void setRevealMomentsFromStartAndInterval(DateTime startTime, Duration interval, [int nrOfReveals = 100]){
     print('Setting revealMoment!');
     // List<DateTime> list = new List<DateTime>();
