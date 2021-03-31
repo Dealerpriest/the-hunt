@@ -21,8 +21,20 @@ abstract class _Checkpoints with Store {
     return checkpoints.map<Marker>((checkpoint){
       BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
-      return Marker(markerId: MarkerId(checkpoint.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
+      return Marker(markerId: MarkerId(checkpoint.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon, draggable: true, onDragEnd: (LatLng coords){
+        this.moveCheckpoint(checkpoint, coords);
+      });
     }).toSet().asObservable();
+  }
+
+  @action
+  moveCheckpoint(ParseObject checkpoint, LatLng coords) async {
+    ParseObject updatedCheckpoint = await updateCheckpointPosition(checkpoint, coords);
+    int idx = this.checkpoints.indexWhere((ParseObject checkpoint) => checkpoint.objectId == updatedCheckpoint.objectId);
+    if(idx >= 0) {
+      checkpoints[idx] = updatedCheckpoint;
+    }
+    print('checkpoint ${checkpoint} moved to ${coords}');
   }
 
 

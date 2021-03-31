@@ -33,6 +33,15 @@ mixin _$Checkpoints on _Checkpoints, Store {
     });
   }
 
+  final _$moveCheckpointAsyncAction =
+      AsyncAction('_Checkpoints.moveCheckpoint');
+
+  @override
+  Future moveCheckpoint(ParseObject checkpoint, LatLng coords) {
+    return _$moveCheckpointAsyncAction
+        .run(() => super.moveCheckpoint(checkpoint, coords));
+  }
+
   final _$newCheckpointAsyncAction = AsyncAction('_Checkpoints.newCheckpoint');
 
   @override

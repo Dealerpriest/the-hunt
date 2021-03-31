@@ -377,6 +377,12 @@ Future<ParseObject> createCheckpoint(LatLng coords) async{
   return Future.error(response.error);
 }
 
+Future<ParseObject> updateCheckpointPosition(ParseObject checkpoint, LatLng coords) async {
+  ParseGeoPoint geopoint = ParseGeoPoint(latitude: coords.latitude, longitude: coords.longitude);
+  checkpoint.set('coords', geopoint);
+  return (await _unwrapParseResults(checkpoint.save())).first;
+}
+
 Future<List<ParseObject>> fetchAllCheckpoints() async {
   QueryBuilder<ParseObject> checkpointsQuery =
       QueryBuilder<ParseObject>(ParseObject('Checkpoint'));
