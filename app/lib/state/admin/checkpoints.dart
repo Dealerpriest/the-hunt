@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/state/admin/adminStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -13,16 +14,34 @@ abstract class _Checkpoints with Store {
   _Checkpoints({this.parent});
   AdminStore parent;
 
+  CheckpointService checkpointService = CheckpointService();
+
   @observable
   ObservableList<ParseObject> checkpoints = new ObservableList<ParseObject>();
+
+  @observable
+  ObservableList<ParseObject> tappedCheckPoints = new ObservableList<ParseObject>();
 
   @computed
   ObservableSet<Marker> get checkpointMarkers {
     return checkpoints.map<Marker>((checkpoint){
       BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
-      return Marker(markerId: MarkerId(checkpoint.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon, draggable: true, onDragEnd: (LatLng coords){
+      return Marker(markerId: MarkerId(checkpoint.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon, draggable: true,
+      onDragEnd: (LatLng coords){
         this.moveCheckpoint(checkpoint, coords);
+      },
+      onTap: (){
+        print('tapped a checkpoint: ${checkpoint}');
+        this.tappedCheckPoints.add(checkpoint);
+        if(this.tappedCheckPoints.length > 2){
+          tappedCheckPoints.removeAt(0);
+        }
+        if(this.tappedCheckPoints.length != 2){
+          return;
+        }
+        double meters = checkpointService.distanceBetweenCheckpoints(tappedCheckPoints[0], tappedCheckPoints[1]);
+        print('distance between tapped checkpoints: ${meters}');
       });
     }).toSet().asObservable();
   }
