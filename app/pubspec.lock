@@ -147,7 +147,7 @@ packages:
       name: connectivity
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.9+5"
+    version: "2.0.2"
   connectivity_for_web:
     dependency: transitive
     description:
@@ -324,6 +324,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.14.0+4"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.12.2"
   http_multi_server:
     dependency: transitive
     description:
@@ -491,14 +498,14 @@ packages:
       name: parse_server_sdk
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.0"
   parse_server_sdk_flutter:
     dependency: "direct main"
     description:
       name: parse_server_sdk_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.0"
   path:
     dependency: transitive
     description:
@@ -610,7 +617,7 @@ packages:
       name: sembast
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.4.8+1"
+    version: "2.4.10+4"
   sembast_web:
     dependency: transitive
     description:

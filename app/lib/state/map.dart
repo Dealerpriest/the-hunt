@@ -27,7 +27,7 @@ abstract class _Map with Store {
   @computed
   ObservableList<ParseObject> get allMyLocations {
     return locations.where((location) {
-      return location.get<ParseUser>('user').objectId == parent.user.currentUser.objectId;
+      return location.get<ParseUser>('user').objectId == parent.user.id;
     }).toList().asObservable();
   }
   
@@ -43,11 +43,11 @@ abstract class _Map with Store {
     return allPreyLocations.last;
   }
 
-  // TODO: WE probably not want to recalculate this every second.... (because one used observable is a stream)
+  // TODO: WE probably don't want to recalculate this every second.... (because one used observable is a stream)
   @computed
   ObservableList<ParseObject> get revealedPreyLocations {
     return allPreyLocations.where((location){
-      var untilReveal = parent.gameSession.durationUntilNextReveal;
+      var untilReveal = parent.gameSession.durationUntilNextReveal; // Bad performance her i guess
       bool revealed = location.get<bool>('revealed');
       bool isNotYetTriggered = location.createdAt.isAfter(RevealService().latestRevealMoment);
       return revealed && !isNotYetTriggered;
@@ -73,7 +73,7 @@ abstract class _Map with Store {
   ObservableSet<Marker> get markers {
     return revealedPreyLocations.map<Marker>((location){
       ParseUser userOfLocation = location.get<ParseUser>('user');
-      bool isMe = parent.user.currentUser.objectId == userOfLocation.objectId;
+      bool isMe = parent.user.id == userOfLocation.objectId;
       BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
       ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
       return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);

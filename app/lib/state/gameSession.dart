@@ -72,6 +72,9 @@ abstract class _GameSession with Store {
 
   @computed
   DateTime get gameStartTime {
+    if(parseGameSession == null){
+      return null;
+    }
     return parseGameSession.get<DateTime>('startedAt', defaultValue: null);
   }
 
@@ -88,7 +91,7 @@ abstract class _GameSession with Store {
 
   @computed
   bool get isGameHost {
-    return parent.user.currentUser.objectId == this.gameHost.objectId;
+    return parent.user.id == this.gameHost?.objectId;
   }
 
   @observable
@@ -117,7 +120,7 @@ abstract class _GameSession with Store {
 
   @computed
   bool get isPrey {
-    return parent.user.currentUser.objectId == this.prey.objectId;
+    return parent.user.id == this.prey.objectId;
   }
 
   @computed
@@ -151,9 +154,10 @@ abstract class _GameSession with Store {
       return Future.error("Problem. Game name was already in use");
     }
     try {
-      this.parseGameSession = await createGameSession(sessionName);
+      this.parseGameSession = await createGameSession(sessionName, playerName);
+      fetchPlayers();
       _startGameSubscription();
-      await joinGameSession(this.parseGameSession, playerName);
+      // await joinGameSession(this.parseGameSession, playerName);
       setupGameStartedReaction();
       return Future.value();
     }catch (err){
@@ -161,7 +165,6 @@ abstract class _GameSession with Store {
     }
   }
 
-  
   @action
   Future<void> joinGame(sessionName, playerName) async {
     this.parseGameSession = await joinGameSessionByName(sessionName, playerName);
@@ -172,8 +175,30 @@ abstract class _GameSession with Store {
   }
 
   @action
+  Future<void> leaveGame() async {
+    try {
+
+      await leaveCurrentGameSession();
+      if(gameSessionSubscription != null){
+        stopSubscription(gameSessionSubscription);
+      }
+      this.parseGameSession = null;
+      this.parsePlayers = new ObservableList<ParseUser>();
+      this.elapsedGameTime = Stream.value(Duration.zero).asObservable();
+    } catch(err) {
+      log('error', error: err);
+      throw err;
+    }
+  }
+
+  @action
   Future<void> fetchPlayers() async {
-    this.parsePlayers =  (await fetchPlayersForGameSession(this.parseGameSession.objectId)).asObservable();
+    try{
+      this.parsePlayers =  (await fetchPlayersForGameSession(this.parseGameSession.objectId)).asObservable();
+    }catch(err){
+      log('error', error: 'failed to fetch parse players');
+      this.parsePlayers = new ObservableList<ParseUser>();
+    }
     // print('parsePlayers type: ' + this.parsePlayers.runtimeType.toString());
   }
 
@@ -193,9 +218,9 @@ abstract class _GameSession with Store {
 
   void setupGameStartedReaction() async {
     when((_){
-      return null != parseGameSession.get<DateTime>('startedAt');
+      return null != parseGameSession.get<DateTime>('startedAt', defaultValue: null);
     }, (){
-      print('====================>>    Game was started');
+      print('====================>>    ONE SHOT REACTION TRIGGERED: Game was started');
       RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50), 250);
       elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {
       return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
@@ -203,16 +228,15 @@ abstract class _GameSession with Store {
     });
   }
 
-  
-
   Future<void> _startGameSubscription() async{
     if(gameSessionSubscription != null){
       stopSubscription(gameSessionSubscription);
     }
     gameSessionSubscription = await subscribeToGameSession(this.parseGameSession);
       gameSessionSubscription.on(LiveQueryEvent.update, (value) async {
-        // print('gamSession updated!!!: ' + value);
+        print('gameSession updated: ${value}');
         this.parseGameSession = (value as ParseObject);
+        print('refetching all players');
         await this.fetchPlayers();
       });
   }

@@ -13,3 +13,5 @@ Gunnar är bäst!!!
 - Make sure app isn't crashing on no internet conncection (dio.error uncaught exception)
 - leave /destroy game when user leaves it.
 - sometimes when creating game the playerName is blank in the lobby
+- Make revealmoments saved in parse so game master can change dynamically.
+- make create, join and start game snappy! Now very slow doing a lot of async stuff

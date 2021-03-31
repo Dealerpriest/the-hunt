@@ -34,7 +34,7 @@ class LobbyScreen extends StatelessWidget {
           String hostText = appState.gameSession.isGameHost ? ', (you are host)':'';
           return RichText(text: 
             TextSpan(text: 'gameName: ${appState.gameSession.sessionName}${hostText}', 
-              recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () => appState.gameSession.setAdmin(appState.user.currentUser)));
+              recognizer: LongPressGestureRecognizer(duration: Duration(seconds: 3), postAcceptSlopTolerance: 20)..onLongPress = () async => appState.gameSession.setAdmin(await appState.user.currentUser)));
         })
       ),
       body: Center(
@@ -74,7 +74,8 @@ class LobbyScreen extends StatelessWidget {
                     OutlinedButton(
                       // style: Theme.of(ctx).e,
                       child: const Text('Leave'),
-                      onPressed: () {
+                      onPressed: () async {
+                        await appState.gameSession.leaveGame();
                         Navigator.pushReplacementNamed(ctx, '/');
                       },
                     ),

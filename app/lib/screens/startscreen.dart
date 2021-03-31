@@ -5,6 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 // import 'package:learning_flutter/state/gameSession.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 // import 'package:provider/provider.dart';
+import 'package:learning_flutter/services/parseServerInteractions.dart';
 
 class StartScreen extends StatelessWidget {
 
@@ -57,8 +58,8 @@ class StartScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Observer(builder: (_) => Text('players: ' + appState.gameSession.allPlayerNames?.toString()??'no players'),),
-              Observer(builder: (_) => Text('game name: ' + appState.gameSession.sessionName??'no game object'),),
+              // Observer(builder: (_) => Text('players: ' + appState.gameSession.allPlayerNames?.toString()??'no players'),),
+              // Observer(builder: (_) => Text('game name: ' + appState.gameSession.sessionName??'no game object'),),
               Builder(
                 builder: (ctx) => Container(
                   child: Column(
@@ -87,8 +88,10 @@ class StartScreen extends StatelessWidget {
                           },
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      Wrap(
+                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        alignment: WrapAlignment.spaceBetween,
+
                         children: <Widget>[
                           RaisedButton(
                               color: Colors.orange[700],
@@ -118,9 +121,17 @@ class StartScreen extends StatelessWidget {
                           ),
                           RaisedButton(
                               color: Colors.orange[700],
-                              child: Text('Game Screen'),
+                              child: Text('Admin'),
                               onPressed: (){
-                                Navigator.pushNamed(ctx, '/game');
+                                Navigator.pushNamed(ctx, '/admin');
+                                // appState.gameSession.getPlayers();
+                              },
+                          ),
+                          RaisedButton(
+                              color: Colors.orange[700],
+                              child: Text('Test'),
+                              onPressed: (){
+                                // testSaveFunction();
                                 // appState.gameSession.getPlayers();
                               },
                           ),

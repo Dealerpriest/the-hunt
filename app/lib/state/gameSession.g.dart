@@ -171,6 +171,13 @@ mixin _$GameSession on _GameSession, Store {
         .run(() => super.joinGame(sessionName, playerName));
   }
 
+  final _$leaveGameAsyncAction = AsyncAction('_GameSession.leaveGame');
+
+  @override
+  Future<void> leaveGame() {
+    return _$leaveGameAsyncAction.run(() => super.leaveGame());
+  }
+
   final _$fetchPlayersAsyncAction = AsyncAction('_GameSession.fetchPlayers');
 
   @override

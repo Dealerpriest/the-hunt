@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 
+import 'screens/admin/adminMapScreen.dart';
 import 'screens/gamescreen.dart';
 import 'screens/testPage.dart';
 import 'screens/lobbyscreen.dart';
@@ -42,8 +43,9 @@ class MainWidget extends StatelessWidget {
         routes: <String, WidgetBuilder>{
           '/start': (_) => StartScreen(),
           '/lobby': (_) => LobbyScreen(),
-          '/test': (_) => TestScreen(),
+          // '/test': (_) => TestScreen(),
           '/game': (_) => GameScreen(),
+          '/admin': (_) => AdminMapScreen(),
         },
       );
 

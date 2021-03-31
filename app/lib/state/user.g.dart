@@ -24,21 +24,6 @@ mixin _$User on _User, Store {
     });
   }
 
-  final _$currentUserAtom = Atom(name: '_User.currentUser');
-
-  @override
-  ParseUser get currentUser {
-    _$currentUserAtom.reportRead();
-    return super.currentUser;
-  }
-
-  @override
-  set currentUser(ParseUser value) {
-    _$currentUserAtom.reportWrite(value, super.currentUser, () {
-      super.currentUser = value;
-    });
-  }
-
   final _$initUserAsyncAction = AsyncAction('_User.initUser');
 
   @override
@@ -49,8 +34,7 @@ mixin _$User on _User, Store {
   @override
   String toString() {
     return '''
-userCredentials: ${userCredentials},
-currentUser: ${currentUser}
+userCredentials: ${userCredentials}
     ''';
   }
 }

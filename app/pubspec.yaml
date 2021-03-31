@@ -34,7 +34,7 @@ dependencies:
   location: ^3.2.4
   quiver: ^2.1.5
 
-  parse_server_sdk_flutter: ^2.0.0
+  parse_server_sdk_flutter: ^2.1.0
 
   # Won't work together with mobx_codegen until they've updated it
   # mobx: ^2.0.0-nullsafety.2

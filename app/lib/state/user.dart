@@ -15,11 +15,23 @@ abstract class _User with Store {
    _User({this.parent});
   var parent;
 
+
+// TODO: Why observable??? Perhaps even make private?
   @observable
   Map<String, String> userCredentials;
 
-  @observable
-  ParseUser currentUser;
+  // @observable
+  // ParseUser currentUser;
+
+  String _id = null;
+
+  String get id {
+    return _id;
+  }
+
+  Future<ParseUser> get currentUser async{
+    return await ParseUser.currentUser();
+  }
 
   @action
   initUser() async {
@@ -28,7 +40,9 @@ abstract class _User with Store {
     this.userCredentials = userCredentials;
     try {
       await initParse(this.userCredentials['userId'], this.userCredentials['userPassword']);
-      this.currentUser = await ParseUser.currentUser();
+      ParseUser usr = await ParseUser.currentUser();
+      this._id = usr.objectId;
+      // this.currentUser = await ParseUser.currentUser();
     } catch(err) {
       log('error', error: err);
     }

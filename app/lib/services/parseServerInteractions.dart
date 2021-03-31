@@ -1,6 +1,9 @@
 // import 'package:gunnars_test/data/GameModel.dart';
 // import 'package:learning_flutter/screens/gamescreen.dart';
 // import 'package:learning_flutter/state/gameSession.dart';
+import 'dart:developer';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -75,23 +78,78 @@ Future<void> loginOrSignup(userId, userPassword) async {
   }
 }
 
-Future<ParseObject> createGameSession(String name) async {
-  print("creating gameSession $name");
+Future<ParseObject> createGameSession(String name, String playerName) async {
+  print("creating gameSession $name, with playerName:${playerName}");
   ParseUser user = await ParseUser.currentUser();
   ParseObject gameSession = ParseObject('GameSession')
     ..set('name', name)
     ..set('prey', user)
     ..set('owner', user);
     // ..set('participants', ParseRelation());
+  gameSession.addRelation('participants', [user]);
+  
+  // ParseRelation relation = ParseRelation(key: 'participants', parent: gameSession);
+  // relation.add(user);
+  
   try{
-    ParseResponse response = await gameSession.save();
-    if(response.success)
-    return response.results.first;
+    var results = await _unwrapParseResults(gameSession.save());
+
+    ParseObject savedGame = results.first;
+
+    ParseObject refetchedGame = (await _unwrapParseResults(savedGame.getObject(savedGame.objectId))).first;
+
+    user.set<String>('playerName', playerName);
+    // print('gonna set current game to session object: ${savedGame}');
+    user.set<ParseObject>('currentGame', refetchedGame);
+    // print('gonna save the updated user object');
+    await user.save();
+
+    // print('updated user saved');
+    return refetchedGame;
   }catch(err){
-    print(err);
     return Future.error(err);
   }
 }
+
+// Future<void> testSaveFunction() async {
+//   ParseUser user = await ParseUser.currentUser();
+//   ParseObject testThing = ParseObject('TestThing')
+//   ..set('columnA', 'Some text')
+//   ..set('columnB', 12345)
+//   ..set('userPointer', user)
+//   ..addRelation('relationToUsers', [user]);
+
+//   print('testThing before save: \n${testThing}');
+
+//   ParseObject savedThing = await _unwrapParseObject(testThing.save());
+//   print('returned saved testThing: \n${savedThing}');
+
+//   ParseObject refetchedThing = await _unwrapParseObject(ParseObject('TestThing').getObject(savedThing.objectId));
+//   print('refetched testThing (using getObject function): \n${refetchedThing}');
+
+//   QueryBuilder<ParseObject> query =
+//       QueryBuilder<ParseObject>(ParseObject('TestThing'))
+//       ..whereEqualTo('objectId', savedThing.objectId);
+  
+//   ParseObject queriedThing = await _unwrapParseObject(query.query());
+//   print('queried testThing (using querybuilder): \n${queriedThing}');
+// }
+
+// Future<ParseObject> _unwrapParseObject(Future<ParseResponse> responseFuture) async {
+//   ParseResponse response = await responseFuture;
+//   if(response.success){
+//     return response.results.first;
+//   }
+//   return Future.error(response.error);
+// } 
+
+Future<List<ParseObject>> _unwrapParseResults(Future<ParseResponse> responseFuture) async {
+  ParseResponse response = await responseFuture;
+  if(response.success){
+    return response.results;
+  }
+  return Future.error(response.error);
+} 
 
 Future<ParseObject> joinGameSessionByName(String name, String playerName) async {
   print('joining game Session by name: ${name}');
@@ -107,6 +165,10 @@ Future<ParseObject> joinGameSessionByName(String name, String playerName) async 
 }
 
 Future<ParseObject> joinGameSession(ParseObject game, String playerName) async {
+  if(game.get<DateTime>('startedAt') != null){
+    log('error', error: 'game was already started. Too late to join');
+    return Future.error('game already started. Can not join');
+  }
   print('joining gameSession: ${game.objectId} as player ${playerName}');
   ParseUser user = await ParseUser.currentUser();
   if(user == null){
@@ -120,7 +182,8 @@ Future<ParseObject> joinGameSession(ParseObject game, String playerName) async {
   }
 
   user.set('playerName', playerName);
-  user.save();
+  user.set<ParseObject>('currentGame', game);
+  await user.save();
   ParseRelation relation = game.getRelation('participants');
   relation.add(user);
   ParseResponse response = await game.save();
@@ -128,6 +191,26 @@ Future<ParseObject> joinGameSession(ParseObject game, String playerName) async {
     return response.results.first;
   else
     return Future.error(response.error);
+}
+
+
+// TODO: Handle if user is owner, pre or both when they leave a game.
+Future<void> leaveCurrentGameSession() async {
+  try{
+    ParseUser user = await ParseUser.currentUser();
+    ParseObject currentGame = user.get<ParseObject>('currentGame');
+    ParseRelation participants = currentGame.getRelation('participants');
+    participants.remove(user);
+    await currentGame.save();
+    user.unset('currentGame');
+    ParseResponse response = await user.save();
+    if(response.success){
+      return Future.value();
+    }
+    throw response.error;
+  } catch(err){
+    throw err;
+  }
 }
 
 Future<void> setPreyForGameSession (ParseObject gameSession, ParseUser prey) async {
@@ -164,7 +247,7 @@ Future<bool> isGameNameAvailable(String value) async {
       'HEEEELVETE!! ITS ALL GUNNARS FAULT! BUT THIS WENT WRONG. SORRY. CANT HELP IT. DONT CRY. PLEASE.');
 }
 
-// TODO: Only check inside current gamesession. We allow duplicate names in different sessions!
+// TODO: Only check inside current gamesession. We should allow duplicate names in different sessions!
 Future<bool> isPlayerNameAvailable(ParseObject session, String playerName) async {
   print("Is player name $playerName available? ");
   QueryBuilder<ParseObject> query =
@@ -268,7 +351,7 @@ Future<List<ParseObject>> fetchLocationsForGamesession(ParseObject gameSession) 
   QueryBuilder<ParseObject> locationQuery =
       QueryBuilder<ParseObject>(ParseObject('Location'))
         ..whereEqualTo('gameSession', gameSession)
-        ..setLimit(15000);
+        ..setLimit(15000); // We don't expect there to be more than that...
 
   ParseResponse response = await locationQuery.query();
   if(response.success){
@@ -278,6 +361,32 @@ Future<List<ParseObject>> fetchLocationsForGamesession(ParseObject gameSession) 
   return Future.error('no result when trying to fetch locations');
 }
 
+Future<ParseObject> createCheckpoint(LatLng coords) async{
+  print('gonna create a new checkpoint');
+  ParseGeoPoint geopoint = ParseGeoPoint(latitude: coords.latitude, longitude: coords.longitude);
+  print('geopoint: ${geopoint}');
+  ParseObject checkpoint = ParseObject("Checkpoint")
+    ..set('coords', geopoint);
+
+  print('checkpoint: ${checkpoint}');
+  
+  ParseResponse response = await checkpoint.save();
+  if(response.success){
+    return response.results.first;
+  }
+  return Future.error(response.error);
+}
+
+Future<List<ParseObject>> fetchAllCheckpoints() async {
+  QueryBuilder<ParseObject> checkpointsQuery =
+      QueryBuilder<ParseObject>(ParseObject('Checkpoint'));
+  ParseResponse response = await checkpointsQuery.query();
+  if(response.success){
+    return response.results;
+  }
+  return Future.error('failed to fetch checkpoints');
+}
+
 Future<Subscription> subscribeToLocationsForGamesession(ParseObject gameSession) {
   QueryBuilder<ParseObject> locationQuery =
       QueryBuilder<ParseObject>(ParseObject('Location'))
@@ -285,6 +394,14 @@ Future<Subscription> subscribeToLocationsForGamesession(ParseObject gameSession)
 
   final LiveQuery liveQuery = LiveQuery();
   return liveQuery.client.subscribe(locationQuery);
+}
+
+Future<Subscription> subscribeToCheckpoints() {
+  QueryBuilder<ParseObject> checkpointsQuery =
+      QueryBuilder<ParseObject>(ParseObject('Checkpoint'));
+
+  final LiveQuery liveQuery = LiveQuery();
+  return liveQuery.client.subscribe(checkpointsQuery);
 }
 
 void stopSubscription(Subscription subscription) {

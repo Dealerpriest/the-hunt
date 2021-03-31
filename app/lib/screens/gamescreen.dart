@@ -20,10 +20,10 @@ class GameScreen extends StatelessWidget {
     final mapService = MapService();
     final locationService =  LocationService();
     () async {
-      ParseUser user = await ParseUser.currentUser();
+      // ParseUser user = await ParseUser.currentUser();
+      ParseUser user = await appState.user.currentUser;
       await appState.map.fetchAllLocations();
       locationService.startStream(appState.gameSession.parseGameSession, user);
-
     }();
 
     return Scaffold(
