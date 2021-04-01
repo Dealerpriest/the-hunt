@@ -20,7 +20,16 @@ abstract class _Checkpoints with Store {
   ObservableList<ParseObject> checkpoints = new ObservableList<ParseObject>();
 
   @observable
-  ObservableList<ParseObject> tappedCheckpoints = new ObservableList<ParseObject>();
+  ObservableSet<String> tappedCheckpointIds = new ObservableSet<String>();
+
+  @computed
+  ObservableList<ParseObject> get tappedCheckpoints {
+    return checkpoints.where((checkpoint){
+      return tappedCheckpointIds.any((id){
+        return id == checkpoint.objectId;
+      });
+    });
+  }
 
   @computed
   ObservableSet<Polyline> get tappedCheckpointsPolylines {
@@ -67,7 +76,7 @@ abstract class _Checkpoints with Store {
       },
       onTap: (){
         print('tapped a checkpoint: ${checkpoint}');
-        this.tappedCheckpoints.add(checkpoint);
+        this.tappedCheckpointIds.add(checkpoint.objectId);
         if(this.tappedCheckpoints.length > 2){
           tappedCheckpoints.removeAt(0);
         }

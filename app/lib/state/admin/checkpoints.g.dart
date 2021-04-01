@@ -9,6 +9,14 @@ part of 'checkpoints.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$Checkpoints on _Checkpoints, Store {
+  Computed<ObservableList<ParseObject>> _$tappedCheckpointsComputed;
+
+  @override
+  ObservableList<ParseObject> get tappedCheckpoints =>
+      (_$tappedCheckpointsComputed ??= Computed<ObservableList<ParseObject>>(
+              () => super.tappedCheckpoints,
+              name: '_Checkpoints.tappedCheckpoints'))
+          .value;
   Computed<ObservableSet<Polyline>> _$tappedCheckpointsPolylinesComputed;
 
   @override
@@ -50,18 +58,19 @@ mixin _$Checkpoints on _Checkpoints, Store {
     });
   }
 
-  final _$tappedCheckpointsAtom = Atom(name: '_Checkpoints.tappedCheckpoints');
+  final _$tappedCheckpointIdsAtom =
+      Atom(name: '_Checkpoints.tappedCheckpointIds');
 
   @override
-  ObservableList<ParseObject> get tappedCheckpoints {
-    _$tappedCheckpointsAtom.reportRead();
-    return super.tappedCheckpoints;
+  ObservableSet<String> get tappedCheckpointIds {
+    _$tappedCheckpointIdsAtom.reportRead();
+    return super.tappedCheckpointIds;
   }
 
   @override
-  set tappedCheckpoints(ObservableList<ParseObject> value) {
-    _$tappedCheckpointsAtom.reportWrite(value, super.tappedCheckpoints, () {
-      super.tappedCheckpoints = value;
+  set tappedCheckpointIds(ObservableSet<String> value) {
+    _$tappedCheckpointIdsAtom.reportWrite(value, super.tappedCheckpointIds, () {
+      super.tappedCheckpointIds = value;
     });
   }
 
@@ -92,6 +101,7 @@ mixin _$Checkpoints on _Checkpoints, Store {
   String toString() {
     return '''
 checkpoints: ${checkpoints},
+tappedCheckpointIds: ${tappedCheckpointIds},
 tappedCheckpoints: ${tappedCheckpoints},
 tappedCheckpointsPolylines: ${tappedCheckpointsPolylines},
 distanceThroughTappedCheckpoints: ${distanceThroughTappedCheckpoints},
