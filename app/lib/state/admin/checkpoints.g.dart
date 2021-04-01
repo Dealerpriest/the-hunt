@@ -62,13 +62,13 @@ mixin _$Checkpoints on _Checkpoints, Store {
       Atom(name: '_Checkpoints.tappedCheckpointIds');
 
   @override
-  ObservableSet<String> get tappedCheckpointIds {
+  ObservableList<String> get tappedCheckpointIds {
     _$tappedCheckpointIdsAtom.reportRead();
     return super.tappedCheckpointIds;
   }
 
   @override
-  set tappedCheckpointIds(ObservableSet<String> value) {
+  set tappedCheckpointIds(ObservableList<String> value) {
     _$tappedCheckpointIdsAtom.reportWrite(value, super.tappedCheckpointIds, () {
       super.tappedCheckpointIds = value;
     });

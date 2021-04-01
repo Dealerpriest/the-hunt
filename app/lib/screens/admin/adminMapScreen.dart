@@ -50,7 +50,7 @@ class AdminMapScreen extends StatelessWidget {
               // Text('elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds}'),
               // Text('locations: ${appState.map.locations.length}'),
               // Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
-              // Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),
+              Text('nr of checkpoints: ${adminState.checkpoints.checkpoints.length}'),
               Text('distance: ${adminState.checkpoints.distanceThroughTappedCheckpoints.toStringAsFixed(1)}m'),
 
               

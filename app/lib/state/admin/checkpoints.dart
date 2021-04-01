@@ -20,7 +20,7 @@ abstract class _Checkpoints with Store {
   ObservableList<ParseObject> checkpoints = new ObservableList<ParseObject>();
 
   @observable
-  ObservableSet<String> tappedCheckpointIds = new ObservableSet<String>();
+  ObservableList<String> tappedCheckpointIds = new ObservableList<String>();
 
   @computed
   ObservableList<ParseObject> get tappedCheckpoints {
@@ -28,11 +28,12 @@ abstract class _Checkpoints with Store {
       return tappedCheckpointIds.any((id){
         return id == checkpoint.objectId;
       });
-    });
+    }).toList().asObservable();
   }
 
   @computed
   ObservableSet<Polyline> get tappedCheckpointsPolylines {
+    // print('recalculating polylines!!! ------------------------------');
     if(tappedCheckpoints.length < 2){
       return <Polyline>{}.asObservable();
     }
@@ -77,10 +78,10 @@ abstract class _Checkpoints with Store {
       onTap: (){
         print('tapped a checkpoint: ${checkpoint}');
         this.tappedCheckpointIds.add(checkpoint.objectId);
-        if(this.tappedCheckpoints.length > 2){
-          tappedCheckpoints.removeAt(0);
+        if(this.tappedCheckpointIds.length > 2){
+          tappedCheckpointIds.removeAt(0);
         }
-        if(this.tappedCheckpoints.length != 2){
+        if(this.tappedCheckpointIds.length != 2){
           return;
         }
         
@@ -91,9 +92,13 @@ abstract class _Checkpoints with Store {
   @action
   moveCheckpoint(ParseObject checkpoint, LatLng coords) async {
     ParseObject updatedCheckpoint = await updateCheckpointPosition(checkpoint, coords);
+    print('updated checkpoint: ${updatedCheckpoint}');
     int idx = this.checkpoints.indexWhere((ParseObject checkpoint) => checkpoint.objectId == updatedCheckpoint.objectId);
     if(idx >= 0) {
-      checkpoints[idx] = updatedCheckpoint;
+      print('found the checkpoint. updating');
+      // checkpoints[idx] = updatedCheckpoint;
+      checkpoints.removeAt(idx);
+      checkpoints.insert(idx, updatedCheckpoint);
     }
     print('checkpoint ${checkpoint} moved to ${coords}');
   }
