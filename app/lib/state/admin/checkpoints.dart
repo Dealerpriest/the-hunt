@@ -20,7 +20,41 @@ abstract class _Checkpoints with Store {
   ObservableList<ParseObject> checkpoints = new ObservableList<ParseObject>();
 
   @observable
-  ObservableList<ParseObject> tappedCheckPoints = new ObservableList<ParseObject>();
+  ObservableList<ParseObject> tappedCheckpoints = new ObservableList<ParseObject>();
+
+  @computed
+  ObservableSet<Polyline> get tappedCheckpointsPolylines {
+    if(tappedCheckpoints.length < 2){
+      return <Polyline>{}.asObservable();
+    }
+    List<LatLng> points = tappedCheckpoints.map((checkpoint){
+      var geoPoint = checkpoint.get<ParseGeoPoint>('coords');
+      return LatLng(geoPoint.latitude, geoPoint.longitude);
+    }).toList();
+    
+    return {
+      Polyline(
+      patterns: [PatternItem.dot, PatternItem.gap(4)],
+      polylineId: PolylineId(tappedCheckpoints[0].objectId),
+      points: points
+      )
+    }.asObservable();
+  }
+
+  @computed
+  double get distanceThroughTappedCheckpoints {
+    if(tappedCheckpoints.length < 2){
+      return 0;
+    }
+
+    double meters = 0;
+    for (var i = 1; i < tappedCheckpoints.length; i++) {
+      meters += checkpointService.distanceBetweenCheckpoints(tappedCheckpoints[i], tappedCheckpoints[i-1]);
+    }
+    return meters;
+    // print('distance between tapped checkpoints: ${meters}');
+  }
+
 
   @computed
   ObservableSet<Marker> get checkpointMarkers {
@@ -33,15 +67,14 @@ abstract class _Checkpoints with Store {
       },
       onTap: (){
         print('tapped a checkpoint: ${checkpoint}');
-        this.tappedCheckPoints.add(checkpoint);
-        if(this.tappedCheckPoints.length > 2){
-          tappedCheckPoints.removeAt(0);
+        this.tappedCheckpoints.add(checkpoint);
+        if(this.tappedCheckpoints.length > 2){
+          tappedCheckpoints.removeAt(0);
         }
-        if(this.tappedCheckPoints.length != 2){
+        if(this.tappedCheckpoints.length != 2){
           return;
         }
-        double meters = checkpointService.distanceBetweenCheckpoints(tappedCheckPoints[0], tappedCheckPoints[1]);
-        print('distance between tapped checkpoints: ${meters}');
+        
       });
     }).toSet().asObservable();
   }

@@ -9,6 +9,23 @@ part of 'checkpoints.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$Checkpoints on _Checkpoints, Store {
+  Computed<ObservableSet<Polyline>> _$tappedCheckpointsPolylinesComputed;
+
+  @override
+  ObservableSet<Polyline> get tappedCheckpointsPolylines =>
+      (_$tappedCheckpointsPolylinesComputed ??=
+              Computed<ObservableSet<Polyline>>(
+                  () => super.tappedCheckpointsPolylines,
+                  name: '_Checkpoints.tappedCheckpointsPolylines'))
+          .value;
+  Computed<double> _$distanceThroughTappedCheckpointsComputed;
+
+  @override
+  double get distanceThroughTappedCheckpoints =>
+      (_$distanceThroughTappedCheckpointsComputed ??= Computed<double>(
+              () => super.distanceThroughTappedCheckpoints,
+              name: '_Checkpoints.distanceThroughTappedCheckpoints'))
+          .value;
   Computed<ObservableSet<Marker>> _$checkpointMarkersComputed;
 
   @override
@@ -30,6 +47,21 @@ mixin _$Checkpoints on _Checkpoints, Store {
   set checkpoints(ObservableList<ParseObject> value) {
     _$checkpointsAtom.reportWrite(value, super.checkpoints, () {
       super.checkpoints = value;
+    });
+  }
+
+  final _$tappedCheckpointsAtom = Atom(name: '_Checkpoints.tappedCheckpoints');
+
+  @override
+  ObservableList<ParseObject> get tappedCheckpoints {
+    _$tappedCheckpointsAtom.reportRead();
+    return super.tappedCheckpoints;
+  }
+
+  @override
+  set tappedCheckpoints(ObservableList<ParseObject> value) {
+    _$tappedCheckpointsAtom.reportWrite(value, super.tappedCheckpoints, () {
+      super.tappedCheckpoints = value;
     });
   }
 
@@ -60,6 +92,9 @@ mixin _$Checkpoints on _Checkpoints, Store {
   String toString() {
     return '''
 checkpoints: ${checkpoints},
+tappedCheckpoints: ${tappedCheckpoints},
+tappedCheckpointsPolylines: ${tappedCheckpointsPolylines},
+distanceThroughTappedCheckpoints: ${distanceThroughTappedCheckpoints},
 checkpointMarkers: ${checkpointMarkers}
     ''';
   }

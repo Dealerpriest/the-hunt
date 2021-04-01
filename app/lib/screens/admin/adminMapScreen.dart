@@ -21,8 +21,9 @@ class AdminMapScreen extends StatelessWidget {
       body: 
       Observer(builder: 
         (ctx) => GoogleMap(
+          polylines: adminState.checkpoints.tappedCheckpointsPolylines,
           initialCameraPosition: CameraPosition(target: LatLng(57.708870, 11.974560), zoom: 17),
-          mapType: MapType.normal,
+          mapType: MapType.satellite,
           onMapCreated: (GoogleMapController controller) {
             mapService.assignMapController(controller);
           },
@@ -32,6 +33,29 @@ class AdminMapScreen extends StatelessWidget {
           },
           markers: adminState.checkpoints.checkpointMarkers,
         ),
+      ),
+      bottomNavigationBar:
+      Observer(builder: (_) =>
+        Container(
+          padding: EdgeInsets.all(15),
+          child: 
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Text('nr of timer reveals: ${appState.gameSession.nrOfRevealsFromTimer}'),
+              // Text('latest location revealValue: ${appState.map.latestPreyLocation.get<bool>('revealed')}'),
+              // Text('reveal in: ${appState.gameSession.durationUntilNextReveal.inSeconds+1}.${appState.gameSession.durationUntilNextReveal.inMilliseconds - 1000 * appState.gameSession.durationUntilNextReveal.inSeconds }'),
+              // Text('elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds}'),
+              // Text('locations: ${appState.map.locations.length}'),
+              // Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
+              // Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),
+              Text('distance: ${adminState.checkpoints.distanceThroughTappedCheckpoints.toStringAsFixed(1)}m'),
+
+              
+                ],)
+        )
       ),
     );
   }
