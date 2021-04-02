@@ -91,12 +91,21 @@ abstract class _Checkpoints with Store {
 
   @action
   moveCheckpoint(ParseObject checkpoint, LatLng coords) async {
+    // print('checkpoint hashCode before saved: ${checkpoint.hashCode}');
+    var coordsBefore = checkpoint.get<ParseGeoPoint>('coords');
+    // print('coords before: ${coordsBefore.latitude}, ${coordsBefore.longitude}');
     ParseObject updatedCheckpoint = await updateCheckpointPosition(checkpoint, coords);
-    print('updated checkpoint: ${updatedCheckpoint}');
+    var coordsAfter = checkpoint.get<ParseGeoPoint>('coords');
+    // print('coords before: ${coordsAfter.latitude}, ${coordsAfter.longitude}');
+    // print('checkpoint hashCode after save: ${updatedCheckpoint.hashCode}');
+    // print('updated checkpoint: ${updatedCheckpoint}');
     int idx = this.checkpoints.indexWhere((ParseObject checkpoint) => checkpoint.objectId == updatedCheckpoint.objectId);
     if(idx >= 0) {
       print('found the checkpoint. updating');
+      
+      // replacing the index directly doesn't work since the updated object has same hashCode
       // checkpoints[idx] = updatedCheckpoint;
+      // 
       checkpoints.removeAt(idx);
       checkpoints.insert(idx, updatedCheckpoint);
     }

@@ -37,4 +37,8 @@ class CheckpointService {
 
     return geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
   }
+
+  Future<void> createGameCheckpoints() {
+    return null;
+  }
 }

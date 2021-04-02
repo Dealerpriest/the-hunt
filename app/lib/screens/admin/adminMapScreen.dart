@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/services/mapService.dart';
 import 'package:learning_flutter/state/admin/adminStore.dart';
 
@@ -16,6 +17,7 @@ class AdminMapScreen extends StatelessWidget {
     adminState.checkpoints.init();
 
     final mapService = MapService();
+    final checkpointService = CheckpointService();
 
     return Scaffold(
       body: 
@@ -34,6 +36,17 @@ class AdminMapScreen extends StatelessWidget {
           markers: adminState.checkpoints.checkpointMarkers,
         ),
       ),
+      floatingActionButton: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(child: Icon(Icons.face), onPressed: ()async {
+              await checkpointService.createGameCheckpoints();
+              print('pressed da button');
+            })
+          ],
+        )
+      ,
       bottomNavigationBar:
       Observer(builder: (_) =>
         Container(
