@@ -29,6 +29,9 @@ abstract class _GameSession with Store {
   ParseObject parseGameSession;
 
   @observable
+  List<ParseObject> parseCheckpoints = new List<ParseObject>();
+
+  @observable
   ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
 
   @computed
