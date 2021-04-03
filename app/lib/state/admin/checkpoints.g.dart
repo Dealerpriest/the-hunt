@@ -9,6 +9,14 @@ part of 'checkpoints.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$Checkpoints on _Checkpoints, Store {
+  Computed<List<ParseObject>> _$notPickedCheckpointsComputed;
+
+  @override
+  List<ParseObject> get notPickedCheckpoints =>
+      (_$notPickedCheckpointsComputed ??= Computed<List<ParseObject>>(
+              () => super.notPickedCheckpoints,
+              name: '_Checkpoints.notPickedCheckpoints'))
+          .value;
   Computed<ObservableList<ParseObject>> _$tappedCheckpointsComputed;
 
   @override
@@ -34,27 +42,41 @@ mixin _$Checkpoints on _Checkpoints, Store {
               () => super.distanceThroughTappedCheckpoints,
               name: '_Checkpoints.distanceThroughTappedCheckpoints'))
           .value;
-  Computed<ObservableSet<Marker>> _$checkpointMarkersComputed;
+  Computed<Set<Marker>> _$checkpointMarkersComputed;
 
   @override
-  ObservableSet<Marker> get checkpointMarkers =>
-      (_$checkpointMarkersComputed ??= Computed<ObservableSet<Marker>>(
-              () => super.checkpointMarkers,
+  Set<Marker> get checkpointMarkers => (_$checkpointMarkersComputed ??=
+          Computed<Set<Marker>>(() => super.checkpointMarkers,
               name: '_Checkpoints.checkpointMarkers'))
-          .value;
+      .value;
 
-  final _$checkpointsAtom = Atom(name: '_Checkpoints.checkpoints');
+  final _$allCheckpointsAtom = Atom(name: '_Checkpoints.allCheckpoints');
 
   @override
-  ObservableList<ParseObject> get checkpoints {
-    _$checkpointsAtom.reportRead();
-    return super.checkpoints;
+  ObservableList<ParseObject> get allCheckpoints {
+    _$allCheckpointsAtom.reportRead();
+    return super.allCheckpoints;
   }
 
   @override
-  set checkpoints(ObservableList<ParseObject> value) {
-    _$checkpointsAtom.reportWrite(value, super.checkpoints, () {
-      super.checkpoints = value;
+  set allCheckpoints(ObservableList<ParseObject> value) {
+    _$allCheckpointsAtom.reportWrite(value, super.allCheckpoints, () {
+      super.allCheckpoints = value;
+    });
+  }
+
+  final _$pickedCheckpointsAtom = Atom(name: '_Checkpoints.pickedCheckpoints');
+
+  @override
+  List<ParseObject> get pickedCheckpoints {
+    _$pickedCheckpointsAtom.reportRead();
+    return super.pickedCheckpoints;
+  }
+
+  @override
+  set pickedCheckpoints(List<ParseObject> value) {
+    _$pickedCheckpointsAtom.reportWrite(value, super.pickedCheckpoints, () {
+      super.pickedCheckpoints = value;
     });
   }
 
@@ -100,8 +122,10 @@ mixin _$Checkpoints on _Checkpoints, Store {
   @override
   String toString() {
     return '''
-checkpoints: ${checkpoints},
+allCheckpoints: ${allCheckpoints},
+pickedCheckpoints: ${pickedCheckpoints},
 tappedCheckpointIds: ${tappedCheckpointIds},
+notPickedCheckpoints: ${notPickedCheckpoints},
 tappedCheckpoints: ${tappedCheckpoints},
 tappedCheckpointsPolylines: ${tappedCheckpointsPolylines},
 distanceThroughTappedCheckpoints: ${distanceThroughTappedCheckpoints},

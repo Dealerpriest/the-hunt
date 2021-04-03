@@ -2,10 +2,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:geodesy/geodesy.dart' as Geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/services/mapService.dart';
 import 'package:learning_flutter/state/admin/adminStore.dart';
+import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
 
 
@@ -41,8 +43,11 @@ class AdminMapScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FloatingActionButton(child: Icon(Icons.face), onPressed: ()async {
-              await checkpointService.createGameCheckpoints();
-              print('pressed da button');
+              LatLngBounds screenRegion = await mapService.mapControl.getVisibleRegion();
+              Geo.LatLng mapCenter = checkpointService.geodesy.midPointBetweenTwoGeoPoints(mapService.toGeoLatLng(screenRegion.northeast), mapService.toGeoLatLng(screenRegion.southwest));
+              var pickedCheckpoints = await checkpointService.selectGameCheckPoints(adminState.checkpoints.allCheckpoints, mapCenter);
+              adminState.checkpoints.pickedCheckpoints = pickedCheckpoints;
+              // print('pressed da button');
             })
           ],
         )
@@ -62,8 +67,16 @@ class AdminMapScreen extends StatelessWidget {
               // Text('reveal in: ${appState.gameSession.durationUntilNextReveal.inSeconds+1}.${appState.gameSession.durationUntilNextReveal.inMilliseconds - 1000 * appState.gameSession.durationUntilNextReveal.inSeconds }'),
               // Text('elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds}'),
               // Text('locations: ${appState.map.locations.length}'),
-              // Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
-              Text('nr of checkpoints: ${adminState.checkpoints.checkpoints.length}'),
+              Builder(builder: (ctx){
+                if(adminState.checkpoints.tappedCheckpoints.length > 0){
+                  var latlng = adminState.checkpoints.tappedCheckpoints.last.get<ParseGeoPoint>('coords');
+                  return Text('tappedcheckpoint: ${latlng.latitude.toStringAsFixed(5)}, ${latlng.longitude.toStringAsFixed(5)}');
+                }
+                return Container(height: 0, width: 0);
+              }),
+              Text('nr of picked checkpoints: ${adminState.checkpoints.pickedCheckpoints.length}'),
+              
+              Text('nr of checkpoints: ${adminState.checkpoints.allCheckpoints.length}'),
               Text('distance: ${adminState.checkpoints.distanceThroughTappedCheckpoints.toStringAsFixed(1)}m'),
 
               

@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+
+import 'package:geodesy/geodesy.dart' as Geo;
+
 class MapService {
   /// SINGLETON PATTERN
   static MapService _instance;
@@ -35,7 +38,12 @@ class MapService {
     }
   }
 
-  void placeMarker(){
+  toGeoLatLng(LatLng coords){
+    return Geo.LatLng(coords.latitude, coords.longitude);
+  }
+
+  toMapLatLng(Geo.LatLng coords){
+    return LatLng(coords.latitude, coords.longitude);
   }
 
   // void addCircle(double latitude, double longitude, bool isHunter) {

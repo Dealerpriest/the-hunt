@@ -17,14 +17,24 @@ abstract class _Checkpoints with Store {
   CheckpointService checkpointService = CheckpointService();
 
   @observable
-  ObservableList<ParseObject> checkpoints = new ObservableList<ParseObject>();
+  ObservableList<ParseObject> allCheckpoints = new ObservableList<ParseObject>();
+
+  @observable
+  List<ParseObject> pickedCheckpoints = new List<ParseObject>();
+
+  @computed 
+  List<ParseObject> get notPickedCheckpoints {
+    allCheckpoints.where((checkpoint){
+      return pickedCheckpoints.contains(checkpoint);
+    });
+  }
 
   @observable
   ObservableList<String> tappedCheckpointIds = new ObservableList<String>();
 
   @computed
   ObservableList<ParseObject> get tappedCheckpoints {
-    return checkpoints.where((checkpoint){
+    return allCheckpoints.where((checkpoint){
       return tappedCheckpointIds.any((id){
         return id == checkpoint.objectId;
       });
@@ -67,8 +77,8 @@ abstract class _Checkpoints with Store {
 
 
   @computed
-  ObservableSet<Marker> get checkpointMarkers {
-    return checkpoints.map<Marker>((checkpoint){
+  Set<Marker> get checkpointMarkers {
+    return pickedCheckpoints.map<Marker>((checkpoint){
       BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
       return Marker(markerId: MarkerId(checkpoint.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon, draggable: true,
@@ -86,8 +96,10 @@ abstract class _Checkpoints with Store {
         }
         
       });
-    }).toSet().asObservable();
+    }).toSet();
   }
+
+
 
   @action
   moveCheckpoint(ParseObject checkpoint, LatLng coords) async {
@@ -99,15 +111,15 @@ abstract class _Checkpoints with Store {
     // print('coords before: ${coordsAfter.latitude}, ${coordsAfter.longitude}');
     // print('checkpoint hashCode after save: ${updatedCheckpoint.hashCode}');
     // print('updated checkpoint: ${updatedCheckpoint}');
-    int idx = this.checkpoints.indexWhere((ParseObject checkpoint) => checkpoint.objectId == updatedCheckpoint.objectId);
+    int idx = this.allCheckpoints.indexWhere((ParseObject checkpoint) => checkpoint.objectId == updatedCheckpoint.objectId);
     if(idx >= 0) {
       print('found the checkpoint. updating');
       
       // replacing the index directly doesn't work since the updated object has same hashCode
       // checkpoints[idx] = updatedCheckpoint;
       // 
-      checkpoints.removeAt(idx);
-      checkpoints.insert(idx, updatedCheckpoint);
+      allCheckpoints.removeAt(idx);
+      allCheckpoints.insert(idx, updatedCheckpoint);
     }
     print('checkpoint ${checkpoint} moved to ${coords}');
   }
@@ -117,7 +129,7 @@ abstract class _Checkpoints with Store {
   newCheckpoint(LatLng coords) async {
     print('action for creating checkpoint called with: ${coords}');
     ParseObject savedCheckpoint = await createCheckpoint(coords);
-    this.checkpoints.add(savedCheckpoint);
+    this.allCheckpoints.add(savedCheckpoint);
   }
 
   @action
@@ -126,7 +138,7 @@ abstract class _Checkpoints with Store {
     if(fetchedCheckpoints == null){
       return;
     }
-    this.checkpoints = fetchedCheckpoints.asObservable();
+    this.allCheckpoints = fetchedCheckpoints.asObservable();
   }
   
   
