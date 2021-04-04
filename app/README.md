@@ -15,3 +15,4 @@ Gunnar är bäst!!!
 - sometimes when creating game the playerName is blank in the lobby
 - Make revealmoments saved in parse so game master can change dynamically.
 - make create, join and start game snappy! Now very slow doing a lot of async stuff
+- handle so there can't be several subscription triggers. (seems to happen on hot reload sometimes)

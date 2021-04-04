@@ -57,6 +57,10 @@ class LocationService {
     _location.enableBackgroundMode(enable: true);
   }
 
+  Future<LocationData> getCurrentLocation() {
+    return _location.getLocation();
+  }
+
   void set locationInterval(Duration interval) {
     _interval = interval;
     _location.changeSettings(interval: _interval.inMilliseconds);

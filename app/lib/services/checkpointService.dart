@@ -1,6 +1,8 @@
-import 'dart:math';
+import 'dart:developer';
+import 'dart:math' as math;
 
-import 'package:learning_flutter/state/admin/adminStore.dart';
+import 'package:learning_flutter/services/parseServerInteractions.dart' as parse;
+// import 'package:learning_flutter/state/admin/adminStore.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
 import 'package:geodesy/geodesy.dart';
@@ -23,6 +25,7 @@ class CheckpointService {
   //// END SINGLETON PATTERN
 
   Geodesy geodesy;
+  List<ParseObject> allCheckpoints = new List<ParseObject>();
 
   
   // AdminStore adminState;
@@ -31,6 +34,20 @@ class CheckpointService {
     geodesy = Geodesy();
     // adminState = AdminStore.getInstance();
     print('checkpoint service initialized');
+  }
+
+  Future<void> fetchAllCheckpoints() async {
+    try{
+
+      List<ParseObject> fetchedCheckpoints = await parse.fetchAllCheckpoints();
+      if(fetchedCheckpoints == null){
+        return;
+      }
+      this.allCheckpoints = fetchedCheckpoints;
+    }catch(err){
+      log('error', error: err);
+    }
+    return;
   }
 
   double distanceBetweenCheckpoints(ParseObject checkpoint1, ParseObject checkpoint2){
@@ -43,11 +60,19 @@ class CheckpointService {
     return geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
   }
 
-  Future<List<ParseObject>> selectGameCheckPoints(List<ParseObject> alternatives, LatLng mapCenter, {int minDistance = 2000}) {
+  Future<List<ParseObject>> selectGameCheckPoints(LatLng mapCenter, {List<ParseObject> alternatives, int minDistance = 2000}) {
     print('mapcenter is:');
     print(mapCenter);
 
-    final random = Random();
+    // TODO: use the mapCenter for restricitng alternatives to circular area
+    if(alternatives == null){
+      if(this.allCheckpoints.length == 0){
+        log('error', error: 'No checkpoints to use for selection process!!! Baling out');
+      }
+      alternatives = this.allCheckpoints;
+    }
+
+    final random = math.Random();
 
 
     // TODO: This can SURELY be optimized!!!!!!!
@@ -92,9 +117,6 @@ class CheckpointService {
         print('picked checkpoints: ${pickedCheckpoints}');
         return Future.value(pickedCheckpoints);
       }
-
-
-
 
     }
     // print('tried ${attempt} times');

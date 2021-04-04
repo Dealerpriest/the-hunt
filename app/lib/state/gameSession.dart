@@ -1,6 +1,10 @@
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
+import 'package:learning_flutter/services/checkpointService.dart';
+import 'package:learning_flutter/services/locationService.dart' as loc;
+import 'package:geodesy/geodesy.dart' as geo;
 import 'package:learning_flutter/services/parseServerInteractions.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
@@ -19,6 +23,14 @@ abstract class _GameSession with Store {
   _GameSession({this.parent});
   MainStore parent;
 
+
+  // service and other dependencies
+  CheckpointService checkpointService = CheckpointService();
+  loc.LocationService locationService = loc.LocationService();
+
+
+
+
   // ReactionDisposer _disposeStartReaction;
   ReactionDisposer _disposeRevealTimerReaction;
 
@@ -29,7 +41,7 @@ abstract class _GameSession with Store {
   ParseObject parseGameSession;
 
   @observable
-  List<ParseObject> parseCheckpoints = new List<ParseObject>();
+  List<ParseObject> parseGameCheckpoints = new List<ParseObject>();
 
   @observable
   ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
@@ -156,8 +168,19 @@ abstract class _GameSession with Store {
     if(!available){
       return Future.error("Problem. Game name was already in use");
     }
+    ParseGeoPoint startLocation;
+    try{
+      var location = await locationService.getCurrentLocation();
+      startLocation = ParseGeoPoint(latitude: location.latitude, longitude: location.longitude);
+    }catch(err){
+      return Future.error('couldnt get current location. need that to setup game');
+    }
     try {
-      this.parseGameSession = await createGameSession(sessionName, playerName);
+      this.parseGameSession = await createGameSession(sessionName, playerName, startLocation);
+      await checkpointService.fetchAllCheckpoints();
+      geo.LatLng center = geo.LatLng(startLocation.latitude, startLocation.longitude);
+      var pickedCheckpoints = await checkpointService.selectGameCheckPoints(center);
+      this.parseGameSession = await setCheckpointsForGameSession(this.parseGameSession, pickedCheckpoints);
       fetchPlayers();
       _startGameSubscription();
       // await joinGameSession(this.parseGameSession, playerName);
@@ -209,6 +232,7 @@ abstract class _GameSession with Store {
   Future<void> startGame() async {
     parseGameSession.set<DateTime>('startedAt', DateTime.now());
     await parseGameSession.save();
+
     await enterGame();
     return;
   }
@@ -226,8 +250,8 @@ abstract class _GameSession with Store {
       print('====================>>    ONE SHOT REACTION TRIGGERED: Game was started');
       RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50), 250);
       elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {
-      return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
-    }).asObservable(initialValue: Duration.zero);
+        return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
+      }).asObservable(initialValue: Duration.zero);
     });
   }
 

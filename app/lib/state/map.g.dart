@@ -57,12 +57,11 @@ mixin _$Map on _Map, Store {
               () => super.latestRevealedPreyLocation,
               name: '_Map.latestRevealedPreyLocation'))
           .value;
-  Computed<ObservableSet<Marker>> _$markersComputed;
+  Computed<Set<Marker>> _$markersComputed;
 
   @override
-  ObservableSet<Marker> get markers => (_$markersComputed ??=
-          Computed<ObservableSet<Marker>>(() => super.markers,
-              name: '_Map.markers'))
+  Set<Marker> get markers => (_$markersComputed ??=
+          Computed<Set<Marker>>(() => super.markers, name: '_Map.markers'))
       .value;
 
   final _$locationsAtom = Atom(name: '_Map.locations');

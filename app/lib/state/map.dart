@@ -1,6 +1,9 @@
-import 'dart:math';
+// Temporary hack so we can use the class name MAP
+import 'dart:core' hide Map;
+import 'dart:core' as core show Map;
+import 'dart:developer';
+// end of hack
 
-import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:learning_flutter/services/revealService.dart';
 import 'package:learning_flutter/state/mainStore.dart';
@@ -10,6 +13,7 @@ import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
 part 'map.g.dart';
 
+// TODO: Rename this class from Map since thats part of dart language.
 class Map = _Map with _$Map;
 
 Subscription locationSubscription;
@@ -17,7 +21,6 @@ abstract class _Map with Store {
   _Map({this.parent});
   MainStore parent;
 
-  Random rnd = Random();
 
   static LatLng defaultPos = LatLng(57.708870, 11.974560);
 
@@ -47,10 +50,14 @@ abstract class _Map with Store {
   @computed
   ObservableList<ParseObject> get revealedPreyLocations {
     return allPreyLocations.where((location){
-      var untilReveal = parent.gameSession.durationUntilNextReveal; // Bad performance her i guess
-      bool revealed = location.get<bool>('revealed');
-      bool isNotYetTriggered = location.createdAt.isAfter(RevealService().latestRevealMoment);
-      return revealed && !isNotYetTriggered;
+      try{
+        var untilReveal = parent.gameSession.durationUntilNextReveal; // Bad performance her i guess
+        bool revealed = location.get<bool>('revealed');
+        bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+        return revealed && !isNotYetTriggered;
+      }catch(err){
+        return false;
+      }
     }).toList().asObservable();
   }
 
@@ -59,7 +66,12 @@ abstract class _Map with Store {
     return allPreyLocations.where((location){
       var untilReveal = parent.gameSession.durationUntilNextReveal;
       bool revealed = location.get<bool>('revealed');
-      bool isNotYetTriggered = location.createdAt.isAfter(RevealService().latestRevealMoment);
+      bool isNotYetTriggered = true;
+      try{
+        bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+      }catch(err){
+        isNotYetTriggered = true;
+      }
       return revealed && isNotYetTriggered;
     }).toList().asObservable();
   }
@@ -70,14 +82,30 @@ abstract class _Map with Store {
   }
 
   @computed
-  ObservableSet<Marker> get markers {
-    return revealedPreyLocations.map<Marker>((location){
-      ParseUser userOfLocation = location.get<ParseUser>('user');
-      bool isMe = parent.user.id == userOfLocation.objectId;
-      BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
-      ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
-      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
-    }).toSet().asObservable();
+  Set<Marker> get markers {
+    // return Set<Marker>();
+    var checkpoints = parent.gameSession.parseGameSession.get<List<core.Map>>('checkpoints');
+    if(checkpoints == null || checkpoints.length == 0){
+      log('error', error: 'failed to extract checkpoints from gamesession parseObject');
+      return Set<Marker>();
+    }
+    int id = 3000;
+    return checkpoints.map<Marker>((core.Map checkpoint){
+      BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet);
+      LatLng coords = LatLng(checkpoint["coords"]['latitude'], checkpoint['coords']['longitude']);
+      return Marker(markerId: MarkerId((id++).toString()), position: coords, icon: icon);
+    }).toSet();
+
+    // if(revealedPreyLocations == null || revealedPreyLocations.length == 0){
+    //   return ObservableSet<Marker>();
+    // }
+    // return revealedPreyLocations.map<Marker>((location){
+    //   ParseUser userOfLocation = location.get<ParseUser>('user');
+    //   bool isMe = parent.user.id == userOfLocation.objectId;
+    //   BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
+    //   ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
+    //   return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
+    // }).toSet().asObservable();
   }
 
 

@@ -24,7 +24,7 @@ abstract class _Checkpoints with Store {
 
   @computed 
   List<ParseObject> get notPickedCheckpoints {
-    allCheckpoints.where((checkpoint){
+    return allCheckpoints.where((checkpoint){
       return pickedCheckpoints.contains(checkpoint);
     });
   }

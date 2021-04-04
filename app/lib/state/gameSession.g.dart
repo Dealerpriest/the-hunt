@@ -116,18 +116,20 @@ mixin _$GameSession on _GameSession, Store {
     });
   }
 
-  final _$parseCheckpointsAtom = Atom(name: '_GameSession.parseCheckpoints');
+  final _$parseGameCheckpointsAtom =
+      Atom(name: '_GameSession.parseGameCheckpoints');
 
   @override
-  List<ParseObject> get parseCheckpoints {
-    _$parseCheckpointsAtom.reportRead();
-    return super.parseCheckpoints;
+  List<ParseObject> get parseGameCheckpoints {
+    _$parseGameCheckpointsAtom.reportRead();
+    return super.parseGameCheckpoints;
   }
 
   @override
-  set parseCheckpoints(List<ParseObject> value) {
-    _$parseCheckpointsAtom.reportWrite(value, super.parseCheckpoints, () {
-      super.parseCheckpoints = value;
+  set parseGameCheckpoints(List<ParseObject> value) {
+    _$parseGameCheckpointsAtom.reportWrite(value, super.parseGameCheckpoints,
+        () {
+      super.parseGameCheckpoints = value;
     });
   }
 
@@ -243,7 +245,7 @@ mixin _$GameSession on _GameSession, Store {
     return '''
 sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
-parseCheckpoints: ${parseCheckpoints},
+parseGameCheckpoints: ${parseGameCheckpoints},
 elapsedGameTime: ${elapsedGameTime},
 parsePlayers: ${parsePlayers},
 durationUntilNextReveal: ${durationUntilNextReveal},

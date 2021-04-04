@@ -45,7 +45,7 @@ class AdminMapScreen extends StatelessWidget {
             FloatingActionButton(child: Icon(Icons.face), onPressed: ()async {
               LatLngBounds screenRegion = await mapService.mapControl.getVisibleRegion();
               Geo.LatLng mapCenter = checkpointService.geodesy.midPointBetweenTwoGeoPoints(mapService.toGeoLatLng(screenRegion.northeast), mapService.toGeoLatLng(screenRegion.southwest));
-              var pickedCheckpoints = await checkpointService.selectGameCheckPoints(adminState.checkpoints.allCheckpoints, mapCenter);
+              var pickedCheckpoints = await checkpointService.selectGameCheckPoints(mapCenter, alternatives: adminState.checkpoints.allCheckpoints);
               adminState.checkpoints.pickedCheckpoints = pickedCheckpoints;
               // print('pressed da button');
             })
