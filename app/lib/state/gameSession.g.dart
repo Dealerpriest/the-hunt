@@ -9,19 +9,12 @@ part of 'gameSession.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$GameSession on _GameSession, Store {
-  Computed<Duration> _$durationUntilNextRevealComputed;
+  Computed<Duration> _$elapsedGameTimeComputed;
 
   @override
-  Duration get durationUntilNextReveal => (_$durationUntilNextRevealComputed ??=
-          Computed<Duration>(() => super.durationUntilNextReveal,
-              name: '_GameSession.durationUntilNextReveal'))
-      .value;
-  Computed<int> _$nrOfRevealsFromTimerComputed;
-
-  @override
-  int get nrOfRevealsFromTimer => (_$nrOfRevealsFromTimerComputed ??=
-          Computed<int>(() => super.nrOfRevealsFromTimer,
-              name: '_GameSession.nrOfRevealsFromTimer'))
+  Duration get elapsedGameTime => (_$elapsedGameTimeComputed ??=
+          Computed<Duration>(() => super.elapsedGameTime,
+              name: '_GameSession.elapsedGameTime'))
       .value;
   Computed<String> _$sessionNameComputed;
 
@@ -133,18 +126,20 @@ mixin _$GameSession on _GameSession, Store {
     });
   }
 
-  final _$elapsedGameTimeAtom = Atom(name: '_GameSession.elapsedGameTime');
+  final _$currentDateEverySecondAtom =
+      Atom(name: '_GameSession.currentDateEverySecond');
 
   @override
-  ObservableStream<Duration> get elapsedGameTime {
-    _$elapsedGameTimeAtom.reportRead();
-    return super.elapsedGameTime;
+  ObservableStream<DateTime> get currentDateEverySecond {
+    _$currentDateEverySecondAtom.reportRead();
+    return super.currentDateEverySecond;
   }
 
   @override
-  set elapsedGameTime(ObservableStream<Duration> value) {
-    _$elapsedGameTimeAtom.reportWrite(value, super.elapsedGameTime, () {
-      super.elapsedGameTime = value;
+  set currentDateEverySecond(ObservableStream<DateTime> value) {
+    _$currentDateEverySecondAtom
+        .reportWrite(value, super.currentDateEverySecond, () {
+      super.currentDateEverySecond = value;
     });
   }
 
@@ -246,10 +241,9 @@ mixin _$GameSession on _GameSession, Store {
 sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
 parseGameCheckpoints: ${parseGameCheckpoints},
-elapsedGameTime: ${elapsedGameTime},
+currentDateEverySecond: ${currentDateEverySecond},
 parsePlayers: ${parsePlayers},
-durationUntilNextReveal: ${durationUntilNextReveal},
-nrOfRevealsFromTimer: ${nrOfRevealsFromTimer},
+elapsedGameTime: ${elapsedGameTime},
 sessionName: ${sessionName},
 gameStartTime: ${gameStartTime},
 gameStarted: ${gameStarted},

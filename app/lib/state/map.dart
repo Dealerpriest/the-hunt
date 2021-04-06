@@ -51,9 +51,9 @@ abstract class _Map with Store {
   ObservableList<ParseObject> get revealedPreyLocations {
     return allPreyLocations.where((location){
       try{
-        var untilReveal = parent.gameSession.durationUntilNextReveal; // Bad performance her i guess
         bool revealed = location.get<bool>('revealed');
-        bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+        // bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+        bool isNotYetTriggered = parent.revealMoments.latestRevealMoment == null || location.createdAt.isAfter(parent.revealMoments.latestRevealMoment);
         return revealed && !isNotYetTriggered;
       }catch(err){
         return false;
@@ -64,11 +64,11 @@ abstract class _Map with Store {
   @computed
   ObservableList<ParseObject> get pendingPreyLocations {
     return allPreyLocations.where((location){
-      var untilReveal = parent.gameSession.durationUntilNextReveal;
       bool revealed = location.get<bool>('revealed');
       bool isNotYetTriggered = true;
       try{
-        bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+        // bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+        isNotYetTriggered = parent.revealMoments.latestRevealMoment == null || location.createdAt.isAfter(parent.revealMoments.latestRevealMoment);
       }catch(err){
         isNotYetTriggered = true;
       }

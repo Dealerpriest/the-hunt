@@ -21,6 +21,7 @@ Subscription gameSessionSubscription;
 
 abstract class _GameSession with Store {
   _GameSession({this.parent});
+
   MainStore parent;
 
 
@@ -32,7 +33,7 @@ abstract class _GameSession with Store {
 
 
   // ReactionDisposer _disposeStartReaction;
-  ReactionDisposer _disposeRevealTimerReaction;
+  // ReactionDisposer _disposeRevealTimerReaction;
 
   @observable
   bool sessionNameAvailable = false;
@@ -44,35 +45,43 @@ abstract class _GameSession with Store {
   List<ParseObject> parseGameCheckpoints = new List<ParseObject>();
 
   @observable
-  ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
+  ObservableStream<DateTime> currentDateEverySecond;
 
   @computed
-  Duration get durationUntilNextReveal {
-    try {
-      int elapsed = elapsedGameTime.value.inSeconds;
-      Duration untilReveal = RevealService().untilNextRevealMoment;
-      if(untilReveal == null){
-        return Duration.zero;
-      }
-      return untilReveal;
-      // DateTime now = DateTime.now();
-      // DateTime nextReveal = revealMoments.firstWhere((revealMoment) => now.isBefore(revealMoment), orElse: () =>  DateTime.now());
-      // return nextReveal.difference(now);
-    } catch (err){
-      log('error', error: err);
-      return Duration.zero;
-    }
+  Duration get elapsedGameTime {
+    return this.currentDateEverySecond.value.difference(parseGameSession.get<DateTime>('startedAt'));
   }
 
-  int _revealTimerCounter = 0;
+  // @observable
+  // ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
 
-  @computed
-  int get nrOfRevealsFromTimer {
-    if(this.durationUntilNextReveal.inSeconds == 0){
-      _revealTimerCounter++;
-    }
-    return _revealTimerCounter;
-  }
+  // @computed
+  // Duration get durationUntilNextReveal {
+  //   try {
+  //     int elapsed = elapsedGameTime.value.inSeconds;
+  //     Duration untilReveal = RevealService().untilNextRevealMoment;
+  //     if(untilReveal == null){
+  //       return Duration.zero;
+  //     }
+  //     return untilReveal;
+  //     // DateTime now = DateTime.now();
+  //     // DateTime nextReveal = revealMoments.firstWhere((revealMoment) => now.isBefore(revealMoment), orElse: () =>  DateTime.now());
+  //     // return nextReveal.difference(now);
+  //   } catch (err){
+  //     log('error', error: err);
+  //     return Duration.zero;
+  //   }
+  // }
+
+  // int _revealTimerCounter = 0;
+
+  // @computed
+  // int get nrOfRevealsFromTimer {
+  //   if(this.durationUntilNextReveal.inSeconds == 0){
+  //     _revealTimerCounter++;
+  //   }
+  //   return _revealTimerCounter;
+  // }
 
   @computed
   String get sessionName {
@@ -210,7 +219,7 @@ abstract class _GameSession with Store {
       }
       this.parseGameSession = null;
       this.parsePlayers = new ObservableList<ParseUser>();
-      this.elapsedGameTime = Stream.value(Duration.zero).asObservable();
+      // this.elapsedGameTime = Stream.value(Duration.zero).asObservable();
     } catch(err) {
       log('error', error: err);
       throw err;
@@ -249,9 +258,10 @@ abstract class _GameSession with Store {
     }, (){
       print('====================>>    ONE SHOT REACTION TRIGGERED: Game was started');
       RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50), 250);
-      elapsedGameTime = Stream.periodic(Duration(seconds: 1), (count) {
-        return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
-      }).asObservable(initialValue: Duration.zero);
+      currentDateEverySecond = Stream.periodic(Duration(seconds: 1), (count) {
+        // return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
+        return DateTime.now();
+      }).asObservable(initialValue: DateTime.now());
     });
   }
 

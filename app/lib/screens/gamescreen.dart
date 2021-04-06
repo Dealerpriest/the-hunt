@@ -56,10 +56,10 @@ class GameScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('nr of timer reveals: ${appState.gameSession.nrOfRevealsFromTimer}'),
+            // Text('nr of timer reveals: ${appState.gameSession.nrOfRevealsFromTimer}'),
             Text('latest location revealValue: ${appState.map.latestPreyLocation.get<bool>('revealed')}'),
-            Text('reveal in: ${appState.gameSession.durationUntilNextReveal.inSeconds+1}.${appState.gameSession.durationUntilNextReveal.inMilliseconds - 1000 * appState.gameSession.durationUntilNextReveal.inSeconds }'),
-            Text('elapsed: ${appState.gameSession.elapsedGameTime.value.inSeconds}'),
+            // Text('reveal in: ${appState.gameSession.durationUntilNextReveal.inSeconds+1}.${appState.gameSession.durationUntilNextReveal.inMilliseconds - 1000 * appState.gameSession.durationUntilNextReveal.inSeconds }'),
+            Text('elapsed: ${appState.gameSession.elapsedGameTime.inSeconds}'),
             Text('locations: ${appState.map.locations.length}'),
             Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
             Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),

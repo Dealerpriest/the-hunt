@@ -1,3 +1,4 @@
+import 'package:learning_flutter/state/revealMoments.dart';
 import 'package:mobx/mobx.dart';
 
 
@@ -40,11 +41,13 @@ abstract class _MainStore with Store {
   GameSession gameSession;
   User user;
   Map map;
+  RevealMoments revealMoments;
 
   _MainStore(){
     gameSession = GameSession(parent: this);
     user = User(parent: this);
     map = Map(parent: this);
+    revealMoments = RevealMoments(parent: this);
   }
 
   // @action
