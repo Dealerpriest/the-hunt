@@ -7,7 +7,7 @@ import 'package:learning_flutter/services/locationService.dart';
 import 'package:learning_flutter/services/mapService.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 
 class GameScreen extends StatelessWidget {
 
@@ -37,7 +37,7 @@ class GameScreen extends StatelessWidget {
           onMapCreated: (GoogleMapController controller) {
             mapService.assignMapController(controller);
           },
-          markers: appState.map.markers,
+          // markers: appState.map.markers,
         ),
       ),
       floatingActionButton: Column(mainAxisAlignment: MainAxisAlignment.end,  children: [
@@ -57,13 +57,15 @@ class GameScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // Text('nr of timer reveals: ${appState.gameSession.nrOfRevealsFromTimer}'),
-            Text('latest location revealValue: ${appState.map.latestPreyLocation.get<bool>('revealed')}'),
-            // Text('reveal in: ${appState.gameSession.durationUntilNextReveal.inSeconds+1}.${appState.gameSession.durationUntilNextReveal.inMilliseconds - 1000 * appState.gameSession.durationUntilNextReveal.inSeconds }'),
+            // Text('latest location revealValue: ${appState.map.latestPreyLocation.get<bool>('revealed')}'),
+            Text('future revealMoments: ${ appState.revealMoments.futureRevealMoments.length }'),
+            Text('past revealMoments: ${ appState.revealMoments.pastRevealMoments.length }'),
+            Text('reveal in: ${appState.revealMoments.untilNextRevealMoment.inSeconds+1}'),
             Text('elapsed: ${appState.gameSession.elapsedGameTime.inSeconds}'),
             Text('locations: ${appState.map.locations.length}'),
             Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
-            Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),
-            Text('markers: ${appState.map.markers.length}'),
+            // Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),
+            // Text('markers: ${appState.map.markers.length}'),
 
             
               ],)

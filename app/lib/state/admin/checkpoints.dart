@@ -104,10 +104,10 @@ abstract class _Checkpoints with Store {
   @action
   moveCheckpoint(ParseObject checkpoint, LatLng coords) async {
     // print('checkpoint hashCode before saved: ${checkpoint.hashCode}');
-    var coordsBefore = checkpoint.get<ParseGeoPoint>('coords');
+    // var coordsBefore = checkpoint.get<ParseGeoPoint>('coords');
     // print('coords before: ${coordsBefore.latitude}, ${coordsBefore.longitude}');
     ParseObject updatedCheckpoint = await updateCheckpointPosition(checkpoint, coords);
-    var coordsAfter = checkpoint.get<ParseGeoPoint>('coords');
+    // var coordsAfter = checkpoint.get<ParseGeoPoint>('coords');
     // print('coords before: ${coordsAfter.latitude}, ${coordsAfter.longitude}');
     // print('checkpoint hashCode after save: ${updatedCheckpoint.hashCode}');
     // print('updated checkpoint: ${updatedCheckpoint}');

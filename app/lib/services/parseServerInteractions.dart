@@ -32,6 +32,8 @@ Future<Map<String, String>> createUserCredentailsFromHardware() async {
   }
 }
 
+final LiveQuery liveQuery = LiveQuery();
+
 Future<void> initParse(userId, userPassword) async {
   String parseUrl = "${env['BACKEND_SERVER_PROTOCOL']}://${env['BACKEND_SERVER']}${env['PARSE_URL_PATH']}";
   await Parse().initialize(env['PARSE_APP_ID'],
@@ -430,7 +432,7 @@ Future<Subscription> subscribeToLocationsForGamesession(ParseObject gameSession)
       QueryBuilder<ParseObject>(ParseObject('Location'))
         ..whereEqualTo('gameSession', gameSession);
 
-  final LiveQuery liveQuery = LiveQuery();
+  // final LiveQuery liveQuery = LiveQuery();
   return liveQuery.client.subscribe(locationQuery);
 }
 
@@ -438,11 +440,12 @@ Future<Subscription> subscribeToCheckpoints() {
   QueryBuilder<ParseObject> checkpointsQuery =
       QueryBuilder<ParseObject>(ParseObject('Checkpoint'));
 
-  final LiveQuery liveQuery = LiveQuery();
+  
   return liveQuery.client.subscribe(checkpointsQuery);
 }
 
 void stopSubscription(Subscription subscription) {
+  print('unsibscribing from subscription ${subscription}');
   final LiveQuery liveQuery = LiveQuery();
   liveQuery.client.unSubscribe(subscription);
 }

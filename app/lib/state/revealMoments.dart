@@ -66,8 +66,9 @@ abstract class _RevealMoments with Store {
   @action
   init() async {
 
-    RevealService().setRevealMomentsFromStartAndInterval(parent.gameSession.parseGameSession.get('startedAt'), Duration(minutes: 1));
-    
+    // RevealService().setRevealMomentsFromStartAndInterval(parent.gameSession.parseGameSession.get('startedAt'), Duration(minutes: 1));
+    var startTime = parent.gameSession.parseGameSession.get<DateTime>('startedAt').toLocal();
+    RevealService().setRevealMomentsFromStartAndInterval(startTime, Duration(seconds: 50), 250);
     this._allRevealMoments = RevealService().revealMoments;
   }
   

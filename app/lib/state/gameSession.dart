@@ -156,6 +156,7 @@ abstract class _GameSession with Store {
   Future<void> setAdmin (ParseUser user){
     print('Calling placeholder setAdmin function');
     print('supposed to set this user as admin:' + user.toString());
+    return Future.value();
     // TODO: actually implement this. remember to also remove user from participants.
   }
 
@@ -239,7 +240,11 @@ abstract class _GameSession with Store {
 
   @action
   Future<void> startGame() async {
+    print('starting gameSession');
     parseGameSession.set<DateTime>('startedAt', DateTime.now());
+    print('now: ${DateTime.now()}');
+    var startedAt = parseGameSession.get<DateTime>('startedAt');
+    print('StartedAt before save: ${startedAt}');
     await parseGameSession.save();
 
     await enterGame();
@@ -257,7 +262,13 @@ abstract class _GameSession with Store {
       return null != parseGameSession.get<DateTime>('startedAt', defaultValue: null);
     }, (){
       print('====================>>    ONE SHOT REACTION TRIGGERED: Game was started');
-      RevealService().setRevealMomentsFromStartAndInterval(parseGameSession.get<DateTime>('startedAt'), Duration(seconds: 50), 250);
+      var startedAt = parseGameSession.get<DateTime>('startedAt');
+      startedAt = startedAt.toLocal();
+      print('startTime: ${startedAt}');
+      
+      // RevealService().setRevealMomentsFromStartAndInterval(startedAt.toLocal(), Duration(seconds: 50), 250);
+      parent.revealMoments.init();
+
       currentDateEverySecond = Stream.periodic(Duration(seconds: 1), (count) {
         // return DateTime.now().difference(parseGameSession.get<DateTime>('startedAt'));
         return DateTime.now();

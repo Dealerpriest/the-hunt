@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:learning_flutter/state/mainStore.dart';
-import 'package:provider/provider.dart';
 // import 'package:gunnars_test/main.dart';
 
 class LobbyScreen extends StatelessWidget {

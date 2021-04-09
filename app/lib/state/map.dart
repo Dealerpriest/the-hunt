@@ -5,7 +5,6 @@ import 'dart:developer';
 // end of hack
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:learning_flutter/services/revealService.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -20,9 +19,6 @@ Subscription locationSubscription;
 abstract class _Map with Store {
   _Map({this.parent});
   MainStore parent;
-
-
-  static LatLng defaultPos = LatLng(57.708870, 11.974560);
 
   @observable
   ObservableList<ParseObject> locations = new ObservableList<ParseObject>();

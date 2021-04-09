@@ -91,9 +91,10 @@ class LocationService {
       // print('shouldReveal:  ${_shouldBeRevealed()}');
       var shouldReveal = _shouldBeRevealed(_lastUsedRevealMoment);
       if(shouldReveal){
-        _lastUsedRevealMoment = RevealService().nextRevealMoment;
+        print('PLAY SOUND!!!!');
+        // _lastUsedRevealMoment = RevealService().nextRevealMoment;
       }
-      sendLocationToParse(currentLocation, gameSession, user, shouldReveal);
+      sendLocationToParse(currentLocation, gameSession, user);
     });
     _streamStarted = true;
     print('location stream started!!!');
@@ -104,22 +105,27 @@ class LocationService {
     if(MainStore.getInstance().gameSession.isHunter){
       return false;
     }
+
+    // await MainStore.getInstance().gameSession.currentDateEverySecond.
     DateTime now = DateTime.now();
-    DateTime nextReveal = RevealService().nextRevealMoment;
+    DateTime nextReveal = RevealService().nextRevealMomentRealTime;
     if(nextReveal == null){
-      log('error', error: 'couldnt get nextRevealMoment');
+      log('error', error: 'couldnt get nextRevealMomentRealTime');
       return true;
     }
     Duration untilNextReveal = nextReveal.difference(now);
+    
+    print('now: ${now}');
+    print('nextReveal: ${nextReveal}');
     print('untilNextReveal: ${untilNextReveal.inSeconds}');
     print('interval: ${_interval.inSeconds}');
     if(untilNextReveal < _interval){
       // Only one reveal per revealMoment!
-      if(nextReveal.isAtSameMomentAs(lastUsedReveal)){
-        print('already revealed one for the picked revealMoment');
-        return false;
-      }
-      print('gonna reveal this location');
+      // if(nextReveal.isAtSameMomentAs(lastUsedReveal)){
+      //   print('already revealed one for the picked revealMoment');
+      //   return false;
+      // }
+      // print('gonna reveal this location');
       return true;
     }
     return false;
