@@ -76,7 +76,7 @@ class CheckpointService {
 
 
     // TODO: This can SURELY be optimized!!!!!!!
-    // Try at most 4000 times.
+    // Try at most 100000 times.
     for (var attempt = 0; attempt < 100000; attempt++) {
       List<ParseObject> allCheckpoints = new List<ParseObject>.from(alternatives);
       List<ParseObject> pickedCheckpoints = new List<ParseObject>();

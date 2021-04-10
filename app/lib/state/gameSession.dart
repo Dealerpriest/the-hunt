@@ -26,8 +26,8 @@ abstract class _GameSession with Store {
 
 
   // service and other dependencies
-  CheckpointService checkpointService = CheckpointService();
-  loc.LocationService locationService = loc.LocationService();
+  CheckpointService _checkpointService = CheckpointService();
+  loc.LocationService _locationService = loc.LocationService();
 
 
 
@@ -41,15 +41,29 @@ abstract class _GameSession with Store {
   @observable
   ParseObject parseGameSession;
 
-  @observable
-  List<ParseObject> parseGameCheckpoints = new List<ParseObject>();
+  @computed
+  List<Map> get checkpoints {
+    print('GETTING CHECKPOINTS FROM PARSE GAMESESSION:');
+    try{
+
+      List<dynamic> checkpoints = this.parseGameSession.get('checkpoints');
+      List<Map> chkpts = checkpoints.cast<Map>();
+      print(chkpts);
+      print(chkpts.runtimeType);
+      return chkpts;
+      // return new List<Map>();
+    }catch(err) {
+      log('error', error: err);
+      return new List<Map>();
+    }
+  }
 
   @observable
-  ObservableStream<DateTime> currentDateEverySecond;
+  ObservableStream<DateTime> currentDateEverySecond = Stream.value(DateTime.now()).asObservable();
 
   @computed
   Duration get elapsedGameTime {
-    return this.currentDateEverySecond.value.difference(parseGameSession.get<DateTime>('startedAt'));
+    return this.currentDateEverySecond.value.difference(parseGameSession.get<DateTime>('startedAt', defaultValue: DateTime.now()));
   }
 
   // @observable
@@ -180,16 +194,16 @@ abstract class _GameSession with Store {
     }
     ParseGeoPoint startLocation;
     try{
-      var location = await locationService.getCurrentLocation();
+      var location = await _locationService.getCurrentLocation();
       startLocation = ParseGeoPoint(latitude: location.latitude, longitude: location.longitude);
     }catch(err){
       return Future.error('couldnt get current location. need that to setup game');
     }
     try {
       this.parseGameSession = await createGameSession(sessionName, playerName, startLocation);
-      await checkpointService.fetchAllCheckpoints();
+      await _checkpointService.fetchAllCheckpoints();
       geo.LatLng center = geo.LatLng(startLocation.latitude, startLocation.longitude);
-      var pickedCheckpoints = await checkpointService.selectGameCheckPoints(center);
+      var pickedCheckpoints = await _checkpointService.selectGameCheckPoints(center);
       this.parseGameSession = await setCheckpointsForGameSession(this.parseGameSession, pickedCheckpoints);
       fetchPlayers();
       _startGameSubscription();

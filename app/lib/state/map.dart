@@ -5,6 +5,7 @@ import 'dart:developer';
 // end of hack
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:learning_flutter/state/admin/checkpoints.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -78,9 +79,8 @@ abstract class _Map with Store {
   }
 
   @computed
-  Set<Marker> get markers {
-    // return Set<Marker>();
-    var checkpoints = parent.gameSession.parseGameSession.get<List<core.Map>>('checkpoints');
+  Set<Marker> get checkpointMarkers {
+    List<core.Map> checkpoints = parent.gameSession.checkpoints;
     if(checkpoints == null || checkpoints.length == 0){
       log('error', error: 'failed to extract checkpoints from gamesession parseObject');
       return Set<Marker>();
@@ -91,6 +91,21 @@ abstract class _Map with Store {
       LatLng coords = LatLng(checkpoint["coords"]['latitude'], checkpoint['coords']['longitude']);
       return Marker(markerId: MarkerId((id++).toString()), position: coords, icon: icon);
     }).toSet();
+  }
+
+  @computed
+  Set<Marker> get markers {
+    // var checkpoints = parent.gameSession.parseGameSession.get<List<core.Map>>('checkpoints');
+    // if(checkpoints == null || checkpoints.length == 0){
+    //   log('error', error: 'failed to extract checkpoints from gamesession parseObject');
+    //   return Set<Marker>();
+    // }
+    // int id = 3000;
+    // return checkpoints.map<Marker>((core.Map checkpoint){
+    //   BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet);
+    //   LatLng coords = LatLng(checkpoint["coords"]['latitude'], checkpoint['coords']['longitude']);
+    //   return Marker(markerId: MarkerId((id++).toString()), position: coords, icon: icon);
+    // }).toSet();
 
     // if(revealedPreyLocations == null || revealedPreyLocations.length == 0){
     //   return ObservableSet<Marker>();

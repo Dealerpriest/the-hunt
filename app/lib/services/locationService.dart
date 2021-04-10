@@ -85,6 +85,8 @@ class LocationService {
       log('error:', error: 'Location stream already started!');
       return;
     }
+    // TODO: We seem to end up with many subscriptions when doing hot reloading.
+    // Could we somehow make sure we only have one stream running at the time?
     _locationStreamSubscription = _location.onLocationChanged.listen((LocationData currentLocation) {
       print('location updated');
       // print(currentLocation);

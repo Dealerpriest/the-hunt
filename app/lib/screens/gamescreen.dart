@@ -37,7 +37,7 @@ class GameScreen extends StatelessWidget {
           onMapCreated: (GoogleMapController controller) {
             mapService.assignMapController(controller);
           },
-          // markers: appState.map.markers,
+          markers: appState.map.checkpointMarkers,
         ),
       ),
       floatingActionButton: Column(mainAxisAlignment: MainAxisAlignment.end,  children: [
@@ -65,7 +65,7 @@ class GameScreen extends StatelessWidget {
             Text('locations: ${appState.map.locations.length}'),
             Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
             // Text('pendingLocations: ${appState.map.pendingPreyLocations.length}'),
-            // Text('markers: ${appState.map.markers.length}'),
+            Text('markers: ${appState.map.checkpointMarkers.length}'),
 
             
               ],)

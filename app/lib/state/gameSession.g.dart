@@ -9,6 +9,13 @@ part of 'gameSession.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$GameSession on _GameSession, Store {
+  Computed<List<Map<dynamic, dynamic>>> _$checkpointsComputed;
+
+  @override
+  List<Map<dynamic, dynamic>> get checkpoints => (_$checkpointsComputed ??=
+          Computed<List<Map<dynamic, dynamic>>>(() => super.checkpoints,
+              name: '_GameSession.checkpoints'))
+      .value;
   Computed<Duration> _$elapsedGameTimeComputed;
 
   @override
@@ -106,23 +113,6 @@ mixin _$GameSession on _GameSession, Store {
   set parseGameSession(ParseObject value) {
     _$parseGameSessionAtom.reportWrite(value, super.parseGameSession, () {
       super.parseGameSession = value;
-    });
-  }
-
-  final _$parseGameCheckpointsAtom =
-      Atom(name: '_GameSession.parseGameCheckpoints');
-
-  @override
-  List<ParseObject> get parseGameCheckpoints {
-    _$parseGameCheckpointsAtom.reportRead();
-    return super.parseGameCheckpoints;
-  }
-
-  @override
-  set parseGameCheckpoints(List<ParseObject> value) {
-    _$parseGameCheckpointsAtom.reportWrite(value, super.parseGameCheckpoints,
-        () {
-      super.parseGameCheckpoints = value;
     });
   }
 
@@ -240,9 +230,9 @@ mixin _$GameSession on _GameSession, Store {
     return '''
 sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
-parseGameCheckpoints: ${parseGameCheckpoints},
 currentDateEverySecond: ${currentDateEverySecond},
 parsePlayers: ${parsePlayers},
+checkpoints: ${checkpoints},
 elapsedGameTime: ${elapsedGameTime},
 sessionName: ${sessionName},
 gameStartTime: ${gameStartTime},
