@@ -60,6 +60,17 @@ class CheckpointService {
     return geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
   }
 
+  Map touchingAnyCheckpoint(List<Map> alternatives, double minDistance, LatLng pos){
+    for (Map checkpoint in alternatives) {
+      LatLng checkpointCoord = LatLng(checkpoint['latitude'], checkpoint['longitude']);
+      double distance = geodesy.distanceBetweenTwoGeoPoints(pos, checkpointCoord);
+      if (distance < minDistance){
+        return checkpoint;
+      }
+    }
+    return null;
+  }
+
   Future<List<ParseObject>> selectGameCheckPoints(LatLng mapCenter, {List<ParseObject> alternatives, int minDistance = 2000}) {
     print('mapcenter is:');
     print(mapCenter);
