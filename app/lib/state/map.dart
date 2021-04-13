@@ -26,6 +26,7 @@ abstract class _Map with Store {
 
   @computed
   ObservableList<ParseObject> get allMyLocations {
+    print('recalculating allMyLocations');
     return locations.where((location) {
       return location.get<ParseUser>('user').objectId == parent.user.id;
     }).toList().asObservable();
@@ -33,6 +34,7 @@ abstract class _Map with Store {
   
   @computed
   ObservableList<ParseObject> get allPreyLocations {
+    print('recalculating allPreyLocations');
     return locations.where((location) {
       return location.get<ParseUser>('user').objectId == parent.gameSession.prey.objectId;
     }).toList().asObservable();
@@ -43,35 +45,33 @@ abstract class _Map with Store {
     return allPreyLocations.last;
   }
 
-  // TODO: WE probably don't want to recalculate this every second.... (because one used observable is a stream)
   @computed
   ObservableList<ParseObject> get revealedPreyLocations {
-    return allPreyLocations.where((location){
-      try{
-        bool revealed = location.get<bool>('revealed');
-        // bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
-        bool isNotYetTriggered = parent.revealMoments.latestRevealMoment == null || location.createdAt.isAfter(parent.revealMoments.latestRevealMoment);
-        return revealed && !isNotYetTriggered;
-      }catch(err){
-        return false;
-      }
-    }).toList().asObservable();
+    print('recalculating revealedPreyLocations');
+
+    var locations = parent.revealMoments.pastRevealMoments.map((DateTime revealMoment) {
+      return allPreyLocations.lastWhere((ParseObject preyLocation){
+        return preyLocation.createdAt.isBefore(revealMoment);
+      });
+    });
+    
+    return locations.toList().asObservable();
   }
 
-  @computed
-  ObservableList<ParseObject> get pendingPreyLocations {
-    return allPreyLocations.where((location){
-      bool revealed = location.get<bool>('revealed');
-      bool isNotYetTriggered = true;
-      try{
-        // bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
-        isNotYetTriggered = parent.revealMoments.latestRevealMoment == null || location.createdAt.isAfter(parent.revealMoments.latestRevealMoment);
-      }catch(err){
-        isNotYetTriggered = true;
-      }
-      return revealed && isNotYetTriggered;
-    }).toList().asObservable();
-  }
+  // @computed
+  // ObservableList<ParseObject> get pendingPreyLocations {
+  //   return allPreyLocations.where((location){
+  //     bool revealed = location.get<bool>('revealed');
+  //     bool isNotYetTriggered = true;
+  //     try{
+  //       // bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
+  //       isNotYetTriggered = parent.revealMoments.latestRevealMoment == null || location.createdAt.isAfter(parent.revealMoments.latestRevealMoment);
+  //     }catch(err){
+  //       isNotYetTriggered = true;
+  //     }
+  //     return revealed && isNotYetTriggered;
+  //   }).toList().asObservable();
+  // }
 
   @computed
   ParseObject get latestRevealedPreyLocation {
@@ -94,7 +94,19 @@ abstract class _Map with Store {
   }
 
   @computed
+  Set<Marker> get revealedPreyMarkers {
+    return revealedPreyLocations.map<Marker>((location){
+      ParseUser userOfLocation = location.get<ParseUser>('user');
+      bool isMe = parent.user.id == userOfLocation.objectId;
+      BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
+      ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
+      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
+    }).toSet();
+  }
+
+  @computed
   Set<Marker> get markers {
+    return checkpointMarkers.union(revealedPreyMarkers);
     // var checkpoints = parent.gameSession.parseGameSession.get<List<core.Map>>('checkpoints');
     // if(checkpoints == null || checkpoints.length == 0){
     //   log('error', error: 'failed to extract checkpoints from gamesession parseObject');

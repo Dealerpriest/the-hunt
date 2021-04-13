@@ -41,14 +41,6 @@ mixin _$Map on _Map, Store {
                   () => super.revealedPreyLocations,
                   name: '_Map.revealedPreyLocations'))
           .value;
-  Computed<ObservableList<ParseObject>> _$pendingPreyLocationsComputed;
-
-  @override
-  ObservableList<ParseObject> get pendingPreyLocations =>
-      (_$pendingPreyLocationsComputed ??= Computed<ObservableList<ParseObject>>(
-              () => super.pendingPreyLocations,
-              name: '_Map.pendingPreyLocations'))
-          .value;
   Computed<ParseObject> _$latestRevealedPreyLocationComputed;
 
   @override
@@ -63,6 +55,13 @@ mixin _$Map on _Map, Store {
   Set<Marker> get checkpointMarkers => (_$checkpointMarkersComputed ??=
           Computed<Set<Marker>>(() => super.checkpointMarkers,
               name: '_Map.checkpointMarkers'))
+      .value;
+  Computed<Set<Marker>> _$revealedPreyMarkersComputed;
+
+  @override
+  Set<Marker> get revealedPreyMarkers => (_$revealedPreyMarkersComputed ??=
+          Computed<Set<Marker>>(() => super.revealedPreyMarkers,
+              name: '_Map.revealedPreyMarkers'))
       .value;
   Computed<Set<Marker>> _$markersComputed;
 
@@ -108,9 +107,9 @@ allMyLocations: ${allMyLocations},
 allPreyLocations: ${allPreyLocations},
 latestPreyLocation: ${latestPreyLocation},
 revealedPreyLocations: ${revealedPreyLocations},
-pendingPreyLocations: ${pendingPreyLocations},
 latestRevealedPreyLocation: ${latestRevealedPreyLocation},
 checkpointMarkers: ${checkpointMarkers},
+revealedPreyMarkers: ${revealedPreyMarkers},
 markers: ${markers}
     ''';
   }

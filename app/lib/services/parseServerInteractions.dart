@@ -305,14 +305,14 @@ Future<List<ParseUser>> fetchPlayersForGameSession(String gameSessionId) async {
 }
 
 Future<Subscription> subscribeToGameSession(ParseObject gameSession){
-  print('Gonna try to subscribe to gameSession' + gameSession.objectId);
+  print('Gonna try to subscribe to gameSession ' + gameSession.objectId);
   QueryBuilder<ParseObject> gameSessionQuery =
     QueryBuilder<ParseObject>(ParseObject('GameSession'))
     ..whereEqualTo('objectId', gameSession.objectId);
 
   // ParseObject('GameSession').getObject(gameSession.objectId);
 
-  final LiveQuery liveQuery = LiveQuery();
+  // final LiveQuery liveQuery = LiveQuery();
   return liveQuery.client.subscribe(gameSessionQuery);
 }
 
@@ -446,6 +446,6 @@ Future<Subscription> subscribeToCheckpoints() {
 
 void stopSubscription(Subscription subscription) {
   print('unsibscribing from subscription ${subscription}');
-  final LiveQuery liveQuery = LiveQuery();
+  // final LiveQuery liveQuery = LiveQuery();
   liveQuery.client.unSubscribe(subscription);
 }

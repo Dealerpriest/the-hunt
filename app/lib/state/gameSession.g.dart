@@ -84,6 +84,22 @@ mixin _$GameSession on _GameSession, Store {
           Computed<bool>(() => super.isHunter, name: '_GameSession.isHunter'))
       .value;
 
+  final _$nrOheckpointTouchesAtom =
+      Atom(name: '_GameSession.nrOheckpointTouches');
+
+  @override
+  int get nrOheckpointTouches {
+    _$nrOheckpointTouchesAtom.reportRead();
+    return super.nrOheckpointTouches;
+  }
+
+  @override
+  set nrOheckpointTouches(int value) {
+    _$nrOheckpointTouchesAtom.reportWrite(value, super.nrOheckpointTouches, () {
+      super.nrOheckpointTouches = value;
+    });
+  }
+
   final _$sessionNameAvailableAtom =
       Atom(name: '_GameSession.sessionNameAvailable');
 
@@ -228,6 +244,7 @@ mixin _$GameSession on _GameSession, Store {
   @override
   String toString() {
     return '''
+nrOheckpointTouches: ${nrOheckpointTouches},
 sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
 currentDateEverySecond: ${currentDateEverySecond},

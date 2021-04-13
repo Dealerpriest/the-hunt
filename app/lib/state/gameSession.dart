@@ -34,6 +34,9 @@ abstract class _GameSession with Store {
 
   // ReactionDisposer _disposeStartReaction;
   // ReactionDisposer _disposeRevealTimerReaction;
+  // 
+  @observable
+  int nrOheckpointTouches = 0;
 
   @observable
   bool sessionNameAvailable = false;

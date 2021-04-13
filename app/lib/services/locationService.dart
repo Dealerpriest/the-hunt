@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
 import '../state/mainStore.dart';
 import './revealService.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
+import 'package:geodesy/geodesy.dart' as geo;
 class LocationService {
   /// SINGLETON PATTERN
   static LocationService _instance;
@@ -97,6 +99,27 @@ class LocationService {
         // _lastUsedRevealMoment = RevealService().nextRevealMoment;
       }
       sendLocationToParse(currentLocation, gameSession, user);
+
+      try {
+        print('hello');
+        var checkpoints = MainStore.getInstance().gameSession.checkpoints;
+        print(checkpoints);
+        geo.LatLng currentPos = geo.LatLng(currentLocation.latitude, currentLocation.longitude);
+        var checkPointsData = CheckpointService().checkCheckpoint(checkpoints, 500, currentPos);
+        if(checkPointsData != null){
+          bool touched = checkPointsData.any((Map data){
+              print(data['touching']);
+              return data['touching'] == true;
+            });
+          if(touched){
+            print('CHECKPOINT TOUCHED!!!!');
+          }
+          print('TouchedCheckpoint is: ${checkPointsData}');
+        }
+
+      } catch(err) {
+        log('error', error: err);
+      }
     });
     _streamStarted = true;
     print('location stream started!!!');
