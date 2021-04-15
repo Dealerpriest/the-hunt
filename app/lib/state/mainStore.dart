@@ -6,6 +6,7 @@ import 'package:mobx/mobx.dart';
 import 'gameSession.dart';
 import 'user.dart';
 import 'map.dart';
+import 'gameCheckpoints.dart';
 
 part 'mainStore.g.dart';
 
@@ -42,12 +43,14 @@ abstract class _MainStore with Store {
   User user;
   Map map;
   RevealMoments revealMoments;
+  GameCheckpoints gameCheckpoints;
 
   _MainStore(){
     gameSession = GameSession(parent: this);
     user = User(parent: this);
     map = Map(parent: this);
     revealMoments = RevealMoments(parent: this);
+    gameCheckpoints = GameCheckpoints(parent: this);
   }
 
   // @action

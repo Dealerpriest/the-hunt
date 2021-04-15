@@ -5,7 +5,6 @@ import 'dart:developer';
 // end of hack
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:learning_flutter/state/admin/checkpoints.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -79,18 +78,43 @@ abstract class _Map with Store {
   }
 
   @computed
-  Set<Marker> get checkpointMarkers {
-    List<core.Map> checkpoints = parent.gameSession.checkpoints;
-    if(checkpoints == null || checkpoints.length == 0){
-      log('error', error: 'failed to extract checkpoints from gamesession parseObject');
-      return Set<Marker>();
+  ObservableSet<Marker> get checkpointMarkers {
+    var touchedCheckpoints = parent.gameCheckpoints.touchedCheckpoints;
+    var touchedMarkers = Set<Marker>();
+    if(touchedCheckpoints == null || touchedCheckpoints.length == 0){
+      log('error', error: 'failed to get checkpoints from gameCheckpoints store');
+    } else{
+      touchedMarkers = touchedCheckpoints.map<Marker>((ParseObject checkpoint){
+        BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+        ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
+
+        LatLng coords = LatLng(geoPoint.latitude, geoPoint.longitude);
+        return Marker(markerId: MarkerId(checkpoint.objectId), position: coords, icon: icon);
+      }).toSet();
     }
-    int id = 3000;
-    return checkpoints.map<Marker>((core.Map checkpoint){
-      BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet);
-      LatLng coords = LatLng(checkpoint["coords"]['latitude'], checkpoint['coords']['longitude']);
-      return Marker(markerId: MarkerId((id++).toString()), position: coords, icon: icon);
-    }).toSet();
+
+    var unTouchedCheckpoints = parent.gameCheckpoints.unTouchedCheckpoints;
+    var unTouchedMarkers = Set<Marker>();
+    if(unTouchedCheckpoints == null || unTouchedCheckpoints.length == 0){
+      log('error', error: 'failed to get checkpoints from gameCheckpoints store');
+    }else{
+      unTouchedMarkers = unTouchedCheckpoints.map<Marker>((ParseObject checkpoint){
+        BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet);
+        ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
+
+        LatLng coords = LatLng(geoPoint.latitude, geoPoint.longitude);
+        return Marker(markerId: MarkerId(checkpoint.objectId), position: coords, icon: icon);
+      }).toSet();
+    }
+
+    return unTouchedMarkers.union(touchedMarkers).asObservable();
+
+    // int id = 3000;
+    // return checkpoints.map<Marker>((core.Map checkpoint){
+    //   BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet);
+    //   LatLng coords = LatLng(checkpoint["coords"]['latitude'], checkpoint['coords']['longitude']);
+    //   return Marker(markerId: MarkerId((id++).toString()), position: coords, icon: icon);
+    // }).toSet();
   }
 
   @computed

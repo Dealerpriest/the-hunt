@@ -78,7 +78,7 @@ abstract class _Checkpoints with Store {
 
   @computed
   Set<Marker> get checkpointMarkers {
-    return pickedCheckpoints.map<Marker>((checkpoint){
+    return allCheckpoints.map<Marker>((checkpoint){
       BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
       return Marker(markerId: MarkerId(checkpoint.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon, draggable: true,

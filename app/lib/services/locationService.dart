@@ -101,20 +101,22 @@ class LocationService {
       sendLocationToParse(currentLocation, gameSession, user);
 
       try {
-        print('hello');
-        var checkpoints = MainStore.getInstance().gameSession.checkpoints;
-        print(checkpoints);
+        // print('hello');
+        var parseCheckpoints = MainStore.getInstance().gameCheckpoints.parseGameCheckpoints;
+        print(parseCheckpoints);
         geo.LatLng currentPos = geo.LatLng(currentLocation.latitude, currentLocation.longitude);
-        var checkPointsData = CheckpointService().checkCheckpoint(checkpoints, 500, currentPos);
-        if(checkPointsData != null){
-          bool touched = checkPointsData.any((Map data){
-              print(data['touching']);
-              return data['touching'] == true;
-            });
-          if(touched){
-            print('CHECKPOINT TOUCHED!!!!');
-          }
-          print('TouchedCheckpoint is: ${checkPointsData}');
+        var checkpointsData = CheckpointService().checkCheckpoints(currentPos, parseCheckpoints, minDistance: 50);
+        if(checkpointsData != null){
+          print('CHECKPOINTDATA');
+          print(checkpointsData);
+          checkpointsData.forEach((Map checkpointData){
+            print("distance: ${checkpointData['distance']}");
+            print("touching: ${checkpointData['touching']}");
+            if(checkpointData['touching'] == true){
+              print('checkpoint touching!!!');
+              MainStore.getInstance().gameCheckpoints.touchCheckpoint(checkpointData['objectId']);
+            }
+          });
         }
 
       } catch(err) {

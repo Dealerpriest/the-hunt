@@ -49,13 +49,14 @@ mixin _$Map on _Map, Store {
               () => super.latestRevealedPreyLocation,
               name: '_Map.latestRevealedPreyLocation'))
           .value;
-  Computed<Set<Marker>> _$checkpointMarkersComputed;
+  Computed<ObservableSet<Marker>> _$checkpointMarkersComputed;
 
   @override
-  Set<Marker> get checkpointMarkers => (_$checkpointMarkersComputed ??=
-          Computed<Set<Marker>>(() => super.checkpointMarkers,
+  ObservableSet<Marker> get checkpointMarkers =>
+      (_$checkpointMarkersComputed ??= Computed<ObservableSet<Marker>>(
+              () => super.checkpointMarkers,
               name: '_Map.checkpointMarkers'))
-      .value;
+          .value;
   Computed<Set<Marker>> _$revealedPreyMarkersComputed;
 
   @override

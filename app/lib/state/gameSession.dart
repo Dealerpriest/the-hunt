@@ -36,7 +36,7 @@ abstract class _GameSession with Store {
   // ReactionDisposer _disposeRevealTimerReaction;
   // 
   @observable
-  int nrOheckpointTouches = 0;
+  int nrOfcheckpointTouches = 0;
 
   @observable
   bool sessionNameAvailable = false;
@@ -44,22 +44,22 @@ abstract class _GameSession with Store {
   @observable
   ParseObject parseGameSession;
 
-  @computed
-  List<Map> get checkpoints {
-    print('GETTING CHECKPOINTS FROM PARSE GAMESESSION:');
-    try{
+  // @computed
+  // List<Map> get checkpoints {
+  //   print('GETTING CHECKPOINTS FROM PARSE GAMESESSION:');
+  //   try{
 
-      List<dynamic> checkpoints = this.parseGameSession.get('checkpoints');
-      List<Map> chkpts = checkpoints.cast<Map>();
-      print(chkpts);
-      print(chkpts.runtimeType);
-      return chkpts;
-      // return new List<Map>();
-    }catch(err) {
-      log('error', error: err);
-      return new List<Map>();
-    }
-  }
+  //     List<dynamic> checkpoints = this.parseGameSession.get('checkpoints');
+  //     List<Map> chkpts = checkpoints.cast<Map>();
+  //     print(chkpts);
+  //     print(chkpts.runtimeType);
+  //     return chkpts;
+  //     // return new List<Map>();
+  //   }catch(err) {
+  //     log('error', error: err);
+  //     return new List<Map>();
+  //   }
+  // }
 
   @observable
   ObservableStream<DateTime> currentDateEverySecond = Stream.value(DateTime.now()).asObservable();
@@ -206,8 +206,9 @@ abstract class _GameSession with Store {
       this.parseGameSession = await createGameSession(sessionName, playerName, startLocation);
       await _checkpointService.fetchAllCheckpoints();
       geo.LatLng center = geo.LatLng(startLocation.latitude, startLocation.longitude);
-      var pickedCheckpoints = await _checkpointService.selectGameCheckPoints(center);
-      this.parseGameSession = await setCheckpointsForGameSession(this.parseGameSession, pickedCheckpoints);
+      var pickedParseCheckpoints = await _checkpointService.selectGameCheckPoints(center);
+      List<ParseObject> parseGameCheckpoints = await setCheckpointsForGameSession(this.parseGameSession, pickedParseCheckpoints);
+      parent.gameCheckpoints.setGameCheckpoints(parseGameCheckpoints);
       fetchPlayers();
       _startGameSubscription();
       // await joinGameSession(this.parseGameSession, playerName);

@@ -22,7 +22,7 @@ abstract class _RevealMoments with Store {
 
   @computed 
   List<DateTime> get futureRevealMoments {
-    print('recalculating futureRevealMoments');
+    // print('recalculating futureRevealMoments');
     return _allRevealMoments.where((DateTime revealMoment){
       var now = parent.gameSession.currentDateEverySecond.value;
       return now.isBefore(revealMoment); 
@@ -31,7 +31,7 @@ abstract class _RevealMoments with Store {
 
   @computed
   List<DateTime> get pastRevealMoments {
-    print('recalculating pastRevealMoments');
+    // print('recalculating pastRevealMoments');
     return _allRevealMoments.where((DateTime revealMoment) {
       return !this.futureRevealMoments.contains(revealMoment);
     }).toList();

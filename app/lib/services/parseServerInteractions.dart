@@ -397,34 +397,34 @@ Future<List<ParseObject>> fetchAllCheckpoints() async {
   return Future.error('failed to fetch checkpoints');
 }
 
-Future<ParseObject> setCheckpointsForGameSession(ParseObject gameSession, List<ParseObject> checkpoints) async {
-  List<Map> checkpointList = new List<Map>();
-  for (var parseCheckpoint in checkpoints) {
-    var geoPoint = parseCheckpoint.get<ParseGeoPoint>('coords');
-    var coords = {'latitude': geoPoint.latitude, 'longitude': geoPoint.longitude};
-    var difficulty = parseCheckpoint.get('difficulty');
-    var cleared = false;
-    checkpointList.add({'difficulty': difficulty, 'coords': coords, 'cleared': cleared});
-  }
-  gameSession.set('checkpoints', checkpointList);
-  return (await _unwrapParseResults(gameSession.save())).first;
-  // try{
-  //   for (var checkpoint in checkpoints) {
-  //     ParseObject gameCheckpoint = new ParseObject('GameCheckpoint');
-  //     gameCheckpoint.set('coords', checkpoint.get('coords'));
-  //     gameCheckpoint.set('difficulty', checkpoint.get('difficulty'));
-  //     gameCheckpoint.set('cleared', false);
-  //     gameCheckpoint.set('gameSession', gameSession);
-
-  //     await _unwrapParseResults(gameCheckpoint.save());
-  //   }
-  //   QueryBuilder<ParseObject> gameCheckpointsQuery = QueryBuilder<ParseObject>(ParseObject('GameCheckpoint'));
-  //   gameCheckpointsQuery.whereEqualTo('gameSession', gameSession);
-  //   return _unwrapParseResults(gameCheckpointsQuery.query());
-  // }catch(err){
-  //   log('error', error: err);
-  //   return Future.error(err);
+Future<List<ParseObject>> setCheckpointsForGameSession(ParseObject gameSession, List<ParseObject> checkpoints) async {
+  // List<Map> checkpointList = new List<Map>();
+  // for (var parseCheckpoint in checkpoints) {
+  //   var geoPoint = parseCheckpoint.get<ParseGeoPoint>('coords');
+  //   var coords = {'latitude': geoPoint.latitude, 'longitude': geoPoint.longitude};
+  //   var difficulty = parseCheckpoint.get('difficulty');
+  //   var cleared = false;
+  //   checkpointList.add({'difficulty': difficulty, 'coords': coords, 'cleared': cleared});
   // }
+  // gameSession.set('checkpoints', checkpointList);
+  // return (await _unwrapParseResults(gameSession.save())).first;
+  try{
+    for (var checkpoint in checkpoints) {
+      ParseObject gameCheckpoint = new ParseObject('GameCheckpoint');
+      gameCheckpoint.set('coords', checkpoint.get('coords'));
+      gameCheckpoint.set('difficulty', checkpoint.get('difficulty'));
+      // gameCheckpoint.set('to', false);
+      gameCheckpoint.set('gameSession', gameSession);
+
+      await _unwrapParseResults(gameCheckpoint.save());
+    }
+    QueryBuilder<ParseObject> gameCheckpointsQuery = QueryBuilder<ParseObject>(ParseObject('GameCheckpoint'));
+    gameCheckpointsQuery.whereEqualTo('gameSession', gameSession);
+    return _unwrapParseResults(gameCheckpointsQuery.query());
+  }catch(err){
+    log('error', error: err);
+    return Future.error(err);
+  }
 }
 
 Future<Subscription> subscribeToLocationsForGamesession(ParseObject gameSession) {

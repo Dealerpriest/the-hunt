@@ -66,8 +66,9 @@ class GameScreen extends StatelessWidget {
             Text('locations: ${appState.map.locations.length}'),
             Text('allPreyLocations: ${appState.map.allPreyLocations.length}'),
             Text('revealedlocations: ${appState.map.revealedPreyLocations.length}'),
-            Text('markers: ${appState.map.checkpointMarkers.length}'),
-            Text('touches: ${appState.gameSession.nrOheckpointTouches}'),
+            Text('gameCheckpoints: ${appState.gameCheckpoints.parseGameCheckpoints.length}'),
+            Text('untouchedGameCheckpoints: ${appState.gameCheckpoints.unTouchedCheckpoints.length}'),
+            Text('touchedGameCheckpoints: ${appState.gameCheckpoints.touchedCheckpoints.length}'),
 
             
               ],)

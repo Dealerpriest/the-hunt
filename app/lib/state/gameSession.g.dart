@@ -9,13 +9,6 @@ part of 'gameSession.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$GameSession on _GameSession, Store {
-  Computed<List<Map<dynamic, dynamic>>> _$checkpointsComputed;
-
-  @override
-  List<Map<dynamic, dynamic>> get checkpoints => (_$checkpointsComputed ??=
-          Computed<List<Map<dynamic, dynamic>>>(() => super.checkpoints,
-              name: '_GameSession.checkpoints'))
-      .value;
   Computed<Duration> _$elapsedGameTimeComputed;
 
   @override
@@ -84,19 +77,20 @@ mixin _$GameSession on _GameSession, Store {
           Computed<bool>(() => super.isHunter, name: '_GameSession.isHunter'))
       .value;
 
-  final _$nrOheckpointTouchesAtom =
-      Atom(name: '_GameSession.nrOheckpointTouches');
+  final _$nrOfcheckpointTouchesAtom =
+      Atom(name: '_GameSession.nrOfcheckpointTouches');
 
   @override
-  int get nrOheckpointTouches {
-    _$nrOheckpointTouchesAtom.reportRead();
-    return super.nrOheckpointTouches;
+  int get nrOfcheckpointTouches {
+    _$nrOfcheckpointTouchesAtom.reportRead();
+    return super.nrOfcheckpointTouches;
   }
 
   @override
-  set nrOheckpointTouches(int value) {
-    _$nrOheckpointTouchesAtom.reportWrite(value, super.nrOheckpointTouches, () {
-      super.nrOheckpointTouches = value;
+  set nrOfcheckpointTouches(int value) {
+    _$nrOfcheckpointTouchesAtom.reportWrite(value, super.nrOfcheckpointTouches,
+        () {
+      super.nrOfcheckpointTouches = value;
     });
   }
 
@@ -244,12 +238,11 @@ mixin _$GameSession on _GameSession, Store {
   @override
   String toString() {
     return '''
-nrOheckpointTouches: ${nrOheckpointTouches},
+nrOfcheckpointTouches: ${nrOfcheckpointTouches},
 sessionNameAvailable: ${sessionNameAvailable},
 parseGameSession: ${parseGameSession},
 currentDateEverySecond: ${currentDateEverySecond},
 parsePlayers: ${parsePlayers},
-checkpoints: ${checkpoints},
 elapsedGameTime: ${elapsedGameTime},
 sessionName: ${sessionName},
 gameStartTime: ${gameStartTime},

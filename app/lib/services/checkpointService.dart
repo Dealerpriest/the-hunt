@@ -60,13 +60,14 @@ class CheckpointService {
     return geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
   }
 
-  List<Map> checkCheckpoint(List<Map> alternatives, double minDistance, LatLng pos){
-    return alternatives.map((Map checkpoint) {
-      Map coords = checkpoint['coords'];
-      LatLng checkpointCoord = LatLng(coords['latitude'], coords['longitude']);
+  List<Map> checkCheckpoints(LatLng pos, List<ParseObject> alternatives, { double minDistance = 10 }){
+    return alternatives.map((ParseObject checkpoint) {
+      ParseGeoPoint coords = checkpoint.get<ParseGeoPoint>('coords');
+      LatLng checkpointCoord = LatLng(coords.latitude, coords.longitude);
       double distance = geodesy.distanceBetweenTwoGeoPoints(pos, checkpointCoord);
 
       return {
+        'objectId': checkpoint.objectId,
         'coords': coords,
         'distance': distance,
         'touching': distance < minDistance
@@ -88,6 +89,18 @@ class CheckpointService {
 
     final random = math.Random();
 
+    // TESTING CHECKPOINTS:
+    List<String> testCheckpointsIds = [
+      'KyHXJ0tIp4',
+      'xcB82DMtRl',
+      'OaF2lND21i',
+      'FIp7yyDWZl',
+      'GGALalOKuR',
+      'ase7ndPIMI',
+    ];
+
+    var pickedCheckpoints = allCheckpoints.where((checkpoint)=> testCheckpointsIds.any((id) => id == checkpoint.objectId)).toList();
+    return Future.value(pickedCheckpoints);
 
     // TODO: This can SURELY be optimized!!!!!!!
     // Try at most 100000 times.
