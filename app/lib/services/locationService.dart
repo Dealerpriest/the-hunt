@@ -105,7 +105,7 @@ class LocationService {
         var parseCheckpoints = MainStore.getInstance().gameCheckpoints.parseGameCheckpoints;
         print(parseCheckpoints);
         geo.LatLng currentPos = geo.LatLng(currentLocation.latitude, currentLocation.longitude);
-        var checkpointsData = CheckpointService().checkCheckpoints(currentPos, parseCheckpoints, minDistance: 50);
+        var checkpointsData = CheckpointService().checkCheckpoints(currentPos, parseCheckpoints, minDistance: 5);
         if(checkpointsData != null){
           print('CHECKPOINTDATA');
           print(checkpointsData);

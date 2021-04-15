@@ -97,6 +97,9 @@ class CheckpointService {
       'FIp7yyDWZl',
       'GGALalOKuR',
       'ase7ndPIMI',
+      'FUvVDg6dG5',
+      'bBw337m84R',
+      'Znh4Xf0L3f'
     ];
 
     var pickedCheckpoints = allCheckpoints.where((checkpoint)=> testCheckpointsIds.any((id) => id == checkpoint.objectId)).toList();
