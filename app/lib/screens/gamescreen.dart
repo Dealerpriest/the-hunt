@@ -33,7 +33,7 @@ class GameScreen extends StatelessWidget {
       body: Observer(builder: (_) => 
         GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(57.708870, 11.974560), zoom: 17),
-          mapType: MapType.normal,
+          mapType: MapType.satellite,
           onMapCreated: (GoogleMapController controller) {
             mapService.assignMapController(controller);
           },
@@ -57,7 +57,8 @@ class GameScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Text('nr of timer reveals: ${appState.gameSession.nrOfRevealsFromTimer}'),
+            Text("current Time: ${appState.gameSession.currentDateEverySecond.value??''}"),
+            Text("game startedAt: ${appState.gameSession.gameStartTime??''}"),
             // Text('latest location revealValue: ${appState.map.latestPreyLocation.get<bool>('revealed')}'),
             Text('future revealMoments: ${ appState.revealMoments.futureRevealMoments.length }'),
             Text('past revealMoments: ${ appState.revealMoments.pastRevealMoments.length }'),
@@ -69,6 +70,8 @@ class GameScreen extends StatelessWidget {
             Text('gameCheckpoints: ${appState.gameCheckpoints.parseGameCheckpoints.length}'),
             Text('untouchedGameCheckpoints: ${appState.gameCheckpoints.unTouchedCheckpoints.length}'),
             Text('touchedGameCheckpoints: ${appState.gameCheckpoints.touchedCheckpoints.length}'),
+            
+            // Text('hunter locations: ${appState.map.allHunterLocations.length}'),
 
             
               ],)

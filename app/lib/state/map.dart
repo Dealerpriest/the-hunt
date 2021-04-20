@@ -9,6 +9,7 @@ import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
+import 'package:geodesy/geodesy.dart' as geo;
 
 part 'map.g.dart';
 
@@ -19,6 +20,8 @@ Subscription locationSubscription;
 abstract class _Map with Store {
   _Map({this.parent});
   MainStore parent;
+
+  geo.Geodesy _geodesy = geo.Geodesy();
 
   @observable
   ObservableList<ParseObject> locations = new ObservableList<ParseObject>();
@@ -40,6 +43,34 @@ abstract class _Map with Store {
   }
 
   @computed
+  List<ParseObject> get allHunterLocations {
+    print('recalculating allhunterlocations');
+    return locations.where((location) => location.get<ParseUser>('user').objectId != parent.gameSession.prey.objectId).toList();
+  }
+
+
+  //TODO: We can't do it like this! We need to actually build some data object where players' locations are already separated. Not recalculate it as a computed!
+  // I think this shit is O(n2) or some other really bad number
+  @computed
+  Set<ParseObject> get latestHunterLocations {
+    print('recalculating latest hunter locations');
+    Set<ParseObject> theSet = new Set<ParseObject>();
+    allHunterLocations.forEach((newCandidate){
+      ParseObject previousCandidate = theSet.firstWhere((location){
+        return newCandidate.get<ParseUser>('user').objectId == location.get<ParseUser>('user').objectId;
+      }, orElse: () => null);
+      if(previousCandidate == null){
+        theSet.add(newCandidate);
+      }else if(newCandidate.createdAt.isAfter(previousCandidate.createdAt)){
+        theSet.remove(previousCandidate);
+        theSet.add(newCandidate);
+      }
+    });
+    // print('nr of locations: ${theSet.length}');
+    return theSet;
+  }
+
+  @computed
   ParseObject get latestPreyLocation {
     return allPreyLocations.last;
   }
@@ -56,21 +87,6 @@ abstract class _Map with Store {
     
     return locations.toList().asObservable();
   }
-
-  // @computed
-  // ObservableList<ParseObject> get pendingPreyLocations {
-  //   return allPreyLocations.where((location){
-  //     bool revealed = location.get<bool>('revealed');
-  //     bool isNotYetTriggered = true;
-  //     try{
-  //       // bool isNotYetTriggered = RevealService().latestRevealMoment == null || location.createdAt.isAfter(RevealService().latestRevealMoment);
-  //       isNotYetTriggered = parent.revealMoments.latestRevealMoment == null || location.createdAt.isAfter(parent.revealMoments.latestRevealMoment);
-  //     }catch(err){
-  //       isNotYetTriggered = true;
-  //     }
-  //     return revealed && isNotYetTriggered;
-  //   }).toList().asObservable();
-  // }
 
   @computed
   ParseObject get latestRevealedPreyLocation {
@@ -118,6 +134,18 @@ abstract class _Map with Store {
   }
 
   @computed
+  Set<Marker> get latestHunterMarkers {
+    
+    return latestHunterLocations.map<Marker>((location){
+      // ParseUser userOfLocation = location.get<ParseUser>('user');
+      // bool isMe = parent.user.id == userOfLocation.objectId;
+      BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+      ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
+      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
+    }).toSet();
+  }
+
+  @computed
   Set<Marker> get revealedPreyMarkers {
     return revealedPreyLocations.map<Marker>((location){
       ParseUser userOfLocation = location.get<ParseUser>('user');
@@ -130,7 +158,10 @@ abstract class _Map with Store {
 
   @computed
   Set<Marker> get markers {
-    return checkpointMarkers.union(revealedPreyMarkers);
+    if(parent.gameSession.isPrey){
+      return checkpointMarkers.union(revealedPreyMarkers);
+    }
+    return latestHunterMarkers; //.union(latestHunterMarkers);
     // var checkpoints = parent.gameSession.parseGameSession.get<List<core.Map>>('checkpoints');
     // if(checkpoints == null || checkpoints.length == 0){
     //   log('error', error: 'failed to extract checkpoints from gamesession parseObject');
@@ -155,31 +186,10 @@ abstract class _Map with Store {
     // }).toSet().asObservable();
   }
 
-
-  // @action
-  // generateSomeMarkers() async {
-  //   print('generate markers triggered');
-  //   for (var i = 0; i < 20; i++) {
-  //     int n = markers.length + i;
-  //     String id = "marker-$n";
-  //     MarkerId mrkrId = MarkerId(id);
-  //     double randomOffsetX = rnd.nextDouble()*0.02 - 0.01;
-  //     double randomOffsetY = rnd.nextDouble()*0.02 - 0.01;
-  //     Marker marker = Marker(markerId: mrkrId, draggable: false, position: LatLng(defaultPos.latitude + randomOffsetX, defaultPos.longitude+randomOffsetY));
-
-  //     this.markers.add(marker);
-  //   }
-  // }
-
   @action
   clearAllLocations() async {
     this.locations.clear();
   }
-
-  // @action
-  // revealMostRecentLocation() async {
-    //   updateRevealStateForLocation(allMyLocations.last, true);
-  // }
 
   @action
   fetchAllLocations() async {
@@ -197,11 +207,12 @@ abstract class _Map with Store {
       stopSubscription(locationSubscription);
     }
     locationSubscription = await subscribeToLocationsForGamesession(this.parent.gameSession.parseGameSession);
-    locationSubscription.on(LiveQueryEvent.create, (value) async {
+    locationSubscription.on(LiveQueryEvent.create, (ParseObject value) async {
       print('new location received from parse!!');
-      bool revealed = value.get<bool>('revealed');
-      print("revealed: ${revealed}");
-      this.locations.add(value as ParseObject);
+      // bool revealed = value.get<bool>('revealed');
+      // print("revealed: ${revealed}");
+      
+      this.locations.add(value);
     });
     locationSubscription.on(LiveQueryEvent.update, (value) async {
       print('updated location received from parse!!');
@@ -213,6 +224,24 @@ abstract class _Map with Store {
       }
     });
   }
-  
-  
+
+  List<ParseObject> touchingLocations(ParseObject newLocation) {
+    var newCoords = newLocation.get<ParseGeoPoint>('coords');
+    this.locations.where((ParseObject location){
+      Duration timeDifference = newLocation.createdAt.difference(location.createdAt);
+      if(timeDifference > Duration(seconds: 2)){
+        return false;
+      }
+
+      var coords = location.get<ParseGeoPoint>('coords');
+
+      geo.LatLng pos1 = geo.LatLng(newCoords.latitude, newCoords.longitude);
+      geo.LatLng pos2 = geo.LatLng(coords.latitude, coords.longitude);
+
+      
+      var distance = _geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
+      return distance < 10;
+    });
+  }
+
 }

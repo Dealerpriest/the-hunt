@@ -68,10 +68,7 @@ abstract class _GameSession with Store {
   Duration get elapsedGameTime {
     return this.currentDateEverySecond.value.difference(parseGameSession.get<DateTime>('startedAt', defaultValue: DateTime.now()));
   }
-
-  // @observable
-  // ObservableStream<Duration> elapsedGameTime = Stream.value(Duration.zero).asObservable();
-
+  
   // @computed
   // Duration get durationUntilNextReveal {
   //   try {
