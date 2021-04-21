@@ -52,9 +52,4 @@ abstract class _MainStore with Store {
     revealMoments = RevealMoments(parent: this);
     gameCheckpoints = GameCheckpoints(parent: this);
   }
-
-  // @action
-  // tryToCreateSession(sessionName) async {
-    
-  // }
 }

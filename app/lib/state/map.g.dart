@@ -25,6 +25,21 @@ mixin _$Map on _Map, Store {
               () => super.allPreyLocations,
               name: '_Map.allPreyLocations'))
           .value;
+  Computed<List<ParseObject>> _$allHunterLocationsComputed;
+
+  @override
+  List<ParseObject> get allHunterLocations => (_$allHunterLocationsComputed ??=
+          Computed<List<ParseObject>>(() => super.allHunterLocations,
+              name: '_Map.allHunterLocations'))
+      .value;
+  Computed<Set<ParseObject>> _$latestHunterLocationsComputed;
+
+  @override
+  Set<ParseObject> get latestHunterLocations =>
+      (_$latestHunterLocationsComputed ??= Computed<Set<ParseObject>>(
+              () => super.latestHunterLocations,
+              name: '_Map.latestHunterLocations'))
+          .value;
   Computed<ParseObject> _$latestPreyLocationComputed;
 
   @override
@@ -57,6 +72,13 @@ mixin _$Map on _Map, Store {
               () => super.checkpointMarkers,
               name: '_Map.checkpointMarkers'))
           .value;
+  Computed<Set<Marker>> _$latestHunterMarkersComputed;
+
+  @override
+  Set<Marker> get latestHunterMarkers => (_$latestHunterMarkersComputed ??=
+          Computed<Set<Marker>>(() => super.latestHunterMarkers,
+              name: '_Map.latestHunterMarkers'))
+      .value;
   Computed<Set<Marker>> _$revealedPreyMarkersComputed;
 
   @override
@@ -106,10 +128,13 @@ mixin _$Map on _Map, Store {
 locations: ${locations},
 allMyLocations: ${allMyLocations},
 allPreyLocations: ${allPreyLocations},
+allHunterLocations: ${allHunterLocations},
+latestHunterLocations: ${latestHunterLocations},
 latestPreyLocation: ${latestPreyLocation},
 revealedPreyLocations: ${revealedPreyLocations},
 latestRevealedPreyLocation: ${latestRevealedPreyLocation},
 checkpointMarkers: ${checkpointMarkers},
+latestHunterMarkers: ${latestHunterMarkers},
 revealedPreyMarkers: ${revealedPreyMarkers},
 markers: ${markers}
     ''';
