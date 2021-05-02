@@ -11,7 +11,7 @@ import 'package:mobx/mobx.dart';
 
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
-import '../services/revealService.dart';
+// import '../services/revealService.dart';
 
 part 'gameSession.g.dart';
 
@@ -114,6 +114,32 @@ abstract class _GameSession with Store {
       return null;
     }
     return parseGameSession.get<DateTime>('startedAt', defaultValue: null);
+  }
+
+  @computed get catcher {
+    if(parseGameSession == null){
+      return null;
+    }
+    var pointer = parseGameSession.get<ParseUser>('preyCatchedBy', defaultValue: null);
+    if(pointer == null){
+      return null;
+    }
+    return parsePlayers.firstWhere((player) => player.objectId == pointer.objectId);
+  }
+
+  @computed get catcherName {
+    if(catcher == null){
+      return '';
+    }
+    return catcher.get<String>('playerName');
+  }
+
+  @computed get gameFinished {
+    if(catcher == null){
+      return false;
+    }else {
+      return true;
+    }
   }
 
   @computed get gameStarted {
@@ -268,7 +294,7 @@ abstract class _GameSession with Store {
 
   @action enterGame() async {
     // await parent.map.fetchAllLocations();
-    await parent.map.startLocationSubscription();
+    await parent.locations.startLocationSubscription();
     print('enter game called and finished');
   }
 

@@ -20,18 +20,28 @@ abstract class _RevealMoments with Store {
   @observable
   SortedList<DateTime> _allRevealMoments = SortedList<DateTime>((a, b) => a.compareTo(b));
 
+
+  // hack to only trigger notify when actually changing
+  List<DateTime> _futureReveals;
   @computed 
   List<DateTime> get futureRevealMoments {
     // print('recalculating futureRevealMoments');
-    return _allRevealMoments.where((DateTime revealMoment){
+    List<DateTime> newList = _allRevealMoments.where((DateTime revealMoment){
       var now = parent.gameSession.currentDateEverySecond.value;
       return now.isBefore(revealMoment); 
     }).toList();
+
+    if(_futureReveals == null || _futureReveals.length != newList.length){
+      _futureReveals = newList;
+      return _futureReveals;
+    }
+    
+    return _futureReveals;
   }
 
   @computed
   List<DateTime> get pastRevealMoments {
-    // print('recalculating pastRevealMoments');
+    print('recalculating pastRevealMoments');
     return _allRevealMoments.where((DateTime revealMoment) {
       return !this.futureRevealMoments.contains(revealMoment);
     }).toList();

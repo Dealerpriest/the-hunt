@@ -30,6 +30,26 @@ mixin _$GameSession on _GameSession, Store {
       (_$gameStartTimeComputed ??= Computed<DateTime>(() => super.gameStartTime,
               name: '_GameSession.gameStartTime'))
           .value;
+  Computed<dynamic> _$catcherComputed;
+
+  @override
+  dynamic get catcher => (_$catcherComputed ??=
+          Computed<dynamic>(() => super.catcher, name: '_GameSession.catcher'))
+      .value;
+  Computed<dynamic> _$catcherNameComputed;
+
+  @override
+  dynamic get catcherName =>
+      (_$catcherNameComputed ??= Computed<dynamic>(() => super.catcherName,
+              name: '_GameSession.catcherName'))
+          .value;
+  Computed<dynamic> _$gameFinishedComputed;
+
+  @override
+  dynamic get gameFinished =>
+      (_$gameFinishedComputed ??= Computed<dynamic>(() => super.gameFinished,
+              name: '_GameSession.gameFinished'))
+          .value;
   Computed<dynamic> _$gameStartedComputed;
 
   @override
@@ -246,6 +266,9 @@ parsePlayers: ${parsePlayers},
 elapsedGameTime: ${elapsedGameTime},
 sessionName: ${sessionName},
 gameStartTime: ${gameStartTime},
+catcher: ${catcher},
+catcherName: ${catcherName},
+gameFinished: ${gameFinished},
 gameStarted: ${gameStarted},
 gameHost: ${gameHost},
 isGameHost: ${isGameHost},

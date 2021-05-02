@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
@@ -30,8 +31,10 @@ class LocationService {
   PermissionStatus _permissionGranted;
   StreamSubscription _locationStreamSubscription = null;
   bool _streamStarted = false;
-  Duration _interval = Duration(seconds: 10);
+  Duration _interval = Duration(milliseconds: 10000);
   LocationAccuracy _accuracy = LocationAccuracy.high;
+
+  geo.Geodesy _geodesy;
 
   DateTime _lastUsedRevealMoment = DateTime.now();
 
@@ -55,8 +58,10 @@ class LocationService {
       }
     }
 
-    _location.changeSettings(accuracy: _accuracy, interval: _interval.inMilliseconds);
+    _location.changeSettings(accuracy: _accuracy, interval: _interval.inMilliseconds, distanceFilter: 0);
     _location.enableBackgroundMode(enable: true);
+
+    _geodesy = geo.Geodesy();
   }
 
   Future<LocationData> getCurrentLocation() {
@@ -64,8 +69,9 @@ class LocationService {
   }
 
   void set locationInterval(Duration interval) {
+    print('CHANGING LOCATION INTERVAL!!!!');
     _interval = interval;
-    _location.changeSettings(interval: _interval.inMilliseconds);
+    _location.changeSettings(interval: _interval.inMilliseconds, distanceFilter: 1);
   }
 
   Duration get locationInterval {
@@ -91,8 +97,13 @@ class LocationService {
     // Could we somehow make sure we only have one stream running at the time?
     _locationStreamSubscription = _location.onLocationChanged.listen((LocationData currentLocation) {
       print('location updated');
+      print('interval: ${locationInterval.inMilliseconds}ms');
+      MainStore.getInstance().locations.onLocationChangedCounter++;
       // print(currentLocation);
       // print('shouldReveal:  ${_shouldBeRevealed()}');
+      
+
+
       var shouldReveal = _shouldBeRevealed(_lastUsedRevealMoment);
       if(shouldReveal){
         print('PLAY SOUND!!!!');
@@ -100,31 +111,78 @@ class LocationService {
       }
       sendLocationToParse(currentLocation, gameSession, user);
 
-      try {
+      _checkDistances(currentLocation);
+    });
+    _streamStarted = true;
+    print('location stream started!!!');
+  }
+
+  // TODO: Verify whether we need to refetch all the relevant locations from parse.
+  // Ooooor. Can we trust that our live query is continuously updating the mobx store when phone is pocketed?
+  // Oooor. Can we do best effort here and verify with cloud function afterSave for each incoming location to parse?
+  void _checkDistances(LocationData currentLocation){
+    try {
         // print('hello');
-        var parseCheckpoints = MainStore.getInstance().gameCheckpoints.parseGameCheckpoints;
-        print(parseCheckpoints);
+        var now = DateTime.now();
         geo.LatLng currentPos = geo.LatLng(currentLocation.latitude, currentLocation.longitude);
-        var checkpointsData = CheckpointService().checkCheckpoints(currentPos, parseCheckpoints, minDistance: 5);
-        if(checkpointsData != null){
-          print('CHECKPOINTDATA');
-          print(checkpointsData);
-          checkpointsData.forEach((Map checkpointData){
-            print("distance: ${checkpointData['distance']}");
-            print("touching: ${checkpointData['touching']}");
-            if(checkpointData['touching'] == true){
-              print('checkpoint touching!!!');
-              MainStore.getInstance().gameCheckpoints.touchCheckpoint(checkpointData['objectId']);
-            }
-          });
+
+        var appState = MainStore.getInstance();
+        var parseCheckpoints = appState.gameCheckpoints.parseGameCheckpoints;
+        var hunterLocations = appState.locations.latestHunterLocations;
+        ParseObject closestHunterLocation = null;
+        double closestHunterDistance = double.infinity;
+        ParseObject closestCheckpoint = null;
+        double closestCheckpointDistance = double.infinity;
+        
+        hunterLocations.forEach((ParseObject hunterLocation) {
+          ParseGeoPoint coords = hunterLocation.get<ParseGeoPoint>('coords');
+          geo.LatLng hunterCoords = geo.LatLng(coords.latitude, coords.longitude);
+          double distance = _geodesy.distanceBetweenTwoGeoPoints(currentPos, hunterCoords);
+
+          if(distance < closestHunterDistance) {
+            closestHunterLocation = hunterLocation;
+            closestHunterDistance = distance;
+          }
+
+          Duration timeDifference = now.difference(hunterLocation.createdAt);
+          if(timeDifference > Duration(seconds: 5)){
+            return false;
+          }
+
+          if(closestHunterDistance < 50){
+            print('CATCHED!!!!');
+            ParseUser hunter = closestHunterLocation.get<ParseUser>('user');
+            catchPrey(appState.gameSession.parseGameSession, hunter);
+          }
+
+        });
+
+
+        print('parseCheckPoints: ${parseCheckpoints}');
+        parseCheckpoints.forEach((ParseObject checkpoint){
+          ParseGeoPoint coords = checkpoint.get<ParseGeoPoint>('coords');
+          geo.LatLng checkpointCoord = geo.LatLng(coords.latitude, coords.longitude);
+          double distance = _geodesy.distanceBetweenTwoGeoPoints(currentPos, checkpointCoord);
+
+          if(distance < closestCheckpointDistance){
+            closestCheckpoint = checkpoint;
+            closestCheckpointDistance = distance;
+          }
+        });
+
+        double closestThing = math.min(closestHunterDistance, closestCheckpointDistance);
+
+        if(closestThing < 200){
+          if(this.locationInterval > Duration(seconds: 5))
+            this.locationInterval = Duration(seconds: 1);
+        }else{
+          if(this.locationInterval < Duration(seconds: 5))
+            this.locationInterval = Duration(seconds: 30);
         }
 
       } catch(err) {
         log('error', error: err);
       }
-    });
-    _streamStarted = true;
-    print('location stream started!!!');
   }
 
   bool _shouldBeRevealed(DateTime lastUsedReveal){
@@ -142,10 +200,9 @@ class LocationService {
     }
     Duration untilNextReveal = nextReveal.difference(now);
     
-    print('now: ${now}');
-    print('nextReveal: ${nextReveal}');
-    print('untilNextReveal: ${untilNextReveal.inSeconds}');
-    print('interval: ${_interval.inSeconds}');
+    // print('now: ${now}');
+    // print('nextReveal: ${nextReveal}');
+    // print('untilNextReveal: ${untilNextReveal.inSeconds}');
     if(untilNextReveal < _interval){
       // Only one reveal per revealMoment!
       // if(nextReveal.isAtSameMomentAs(lastUsedReveal)){

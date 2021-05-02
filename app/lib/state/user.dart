@@ -1,3 +1,4 @@
+import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 
 import 'dart:developer';
@@ -11,7 +12,7 @@ class User = _User with _$User;
 
 abstract class _User with Store {
    _User({this.parent});
-  var parent;
+  MainStore parent;
 
 
 // TODO: Why observable??? Perhaps even make private?

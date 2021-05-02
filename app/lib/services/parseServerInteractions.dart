@@ -4,6 +4,7 @@
 import 'dart:developer';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:learning_flutter/state/gameSession.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -198,7 +199,7 @@ Future<ParseObject> joinGameSession(ParseObject game, String playerName) async {
 }
 
 
-// TODO: Handle if user is owner, pre or both when they leave a game.
+// TODO: Handle if user is owner, prey or both when they leave a game.
 Future<void> leaveCurrentGameSession() async {
   try{
     ParseUser user = await ParseUser.currentUser();
@@ -215,6 +216,15 @@ Future<void> leaveCurrentGameSession() async {
   } catch(err){
     throw err;
   }
+}
+
+Future<void> catchPrey(ParseObject gameSession, ParseUser hunter) async {
+  gameSession.set<ParseUser>('preyCatchedBy', hunter);
+  ParseResponse apiResponse = await gameSession.save();
+  if (apiResponse.success) {
+    return;
+  }
+  return Future.error('couldn\'t save the prey to the gameSession');
 }
 
 Future<void> setPreyForGameSession (ParseObject gameSession, ParseUser prey) async {
@@ -306,9 +316,11 @@ Future<List<ParseUser>> fetchPlayersForGameSession(String gameSessionId) async {
 
 Future<Subscription> subscribeToGameSession(ParseObject gameSession){
   print('Gonna try to subscribe to gameSession ' + gameSession.objectId);
+  List<String> includes = ['preyCatchedBy'];
   QueryBuilder<ParseObject> gameSessionQuery =
     QueryBuilder<ParseObject>(ParseObject('GameSession'))
-    ..whereEqualTo('objectId', gameSession.objectId);
+    ..whereEqualTo('objectId', gameSession.objectId)
+    ..includeObject(includes);
 
   // ParseObject('GameSession').getObject(gameSession.objectId);
 

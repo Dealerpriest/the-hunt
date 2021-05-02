@@ -21,6 +21,13 @@ class MapService {
   //// END SINGLETON PATTERN
 
   GoogleMapController mapControl;
+
+  animateToPosition(LatLng coords){
+    if(mapControl == null){
+      return;
+    }
+    mapControl.animateCamera(CameraUpdate.newLatLng(coords));
+  }
   
   assignMapController(GoogleMapController controller) async {
     mapControl = controller;

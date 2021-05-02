@@ -1,3 +1,4 @@
+import 'package:learning_flutter/state/locations.dart';
 import 'package:learning_flutter/state/revealMoments.dart';
 import 'package:mobx/mobx.dart';
 
@@ -5,7 +6,7 @@ import 'package:mobx/mobx.dart';
 
 import 'gameSession.dart';
 import 'user.dart';
-import 'map.dart';
+import 'chart.dart';
 import 'gameCheckpoints.dart';
 
 part 'mainStore.g.dart';
@@ -41,14 +42,16 @@ abstract class _MainStore with Store {
 
   GameSession gameSession;
   User user;
-  Map map;
+  Locations locations;
+  Chart chart;
   RevealMoments revealMoments;
   GameCheckpoints gameCheckpoints;
 
   _MainStore(){
     gameSession = GameSession(parent: this);
     user = User(parent: this);
-    map = Map(parent: this);
+    locations = Locations(parent: this);
+    chart = Chart(parent: this);
     revealMoments = RevealMoments(parent: this);
     gameCheckpoints = GameCheckpoints(parent: this);
   }
