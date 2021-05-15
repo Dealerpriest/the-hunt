@@ -130,11 +130,11 @@ abstract class _Locations with Store {
       print('new location received from parse!!');
       // bool revealed = location.get<bool>('revealed');
       // print("revealed: ${revealed}");
-      if(isPreyLocation(location)){
-        List<dynamic> touchList = _touchingHunterLocations(location);
-        print('touching hunterLocations:');
-        print(touchList);
-      }
+      // if(isPreyLocation(location)){
+      //   List<dynamic> touchList = _touchingHunterLocations(location);
+      //   print('touching hunterLocations:');
+      //   print(touchList);
+      // }
       
       this.allLocations.add(location);
     });

@@ -49,6 +49,8 @@ abstract class _RevealMoments with Store {
 
   @computed
   DateTime get nextRevealMoment {
+    
+    print('recalculating nextRevealMoment');
     if(futureRevealMoments.isEmpty){
       return null;
     }
@@ -72,6 +74,8 @@ abstract class _RevealMoments with Store {
 
   @computed
   DateTime get latestRevealMoment {
+    
+    print('recalculating latestRevealMoment');
     return pastRevealMoments.last;
   }
 
