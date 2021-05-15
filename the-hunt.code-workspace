@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "app"
+		},
+		{
+			"path": "backend"
 		}
 	],
 	"settings": {},
@@ -13,6 +16,11 @@
 				"request": "launch",
 				"type": "dart"
 			}
+		]
+	},
+	"extensions": {
+		"recommendations": [
+			"dart-code.flutter"
 		]
 	}
 }
