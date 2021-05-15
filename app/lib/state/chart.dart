@@ -32,7 +32,7 @@ abstract class _Chart with Store {
         ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
 
         LatLng coords = LatLng(geoPoint.latitude, geoPoint.longitude);
-        return Marker(markerId: MarkerId(checkpoint.objectId), position: coords, icon: icon);
+        return Marker(markerId: MarkerId(checkpoint.objectId), position: coords, icon: icon, infoWindow: InfoWindow(title: 'Touched CP'));
       }).toSet();
     }
     return touchedMarkers;
@@ -50,7 +50,7 @@ abstract class _Chart with Store {
         ParseGeoPoint geoPoint = checkpoint.get<ParseGeoPoint>('coords');
 
         LatLng coords = LatLng(geoPoint.latitude, geoPoint.longitude);
-        return Marker(markerId: MarkerId(checkpoint.objectId), position: coords, icon: icon);
+        return Marker(markerId: MarkerId(checkpoint.objectId), position: coords, icon: icon, infoWindow: InfoWindow(title: 'Untouched CP'));
       }).toSet();
     }
     return unTouchedMarkers;
@@ -78,7 +78,7 @@ abstract class _Chart with Store {
       // bool isMe = parent.user.id == userOfLocation.objectId;
       BitmapDescriptor icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
-      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
+      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon, infoWindow: InfoWindow(title: 'HUNTER'));
     }).toSet();
   }
 
@@ -89,7 +89,7 @@ abstract class _Chart with Store {
       bool isMe = parent.user.id == userOfLocation.objectId;
       BitmapDescriptor icon = isMe ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange) : BitmapDescriptor.defaultMarker;
       ParseGeoPoint geoPoint = location.get<ParseGeoPoint>('coords');
-      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude), icon: icon);
+      return Marker(markerId: MarkerId(location.objectId), position: LatLng(geoPoint.latitude, geoPoint.longitude,), icon: icon, infoWindow: InfoWindow(title: 'PREY'));
     }).toSet();
   }
 
