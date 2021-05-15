@@ -1,0 +1,16 @@
+(cors) {
+  @{args.0} header Origin {args.0}
+  header @{args.0} Access-Control-Allow-Origin {args.0}
+}
+
+{env.BACKEND_SERVER} {
+  # Important to use the route directive so that the reverse_proxy is matched first
+  # (default is try_files before reverse_proxy)
+  route {
+    # import cors localhost
+    reverse_proxy /parse* parse:1337
+    respond "hunt"
+  }
+  
+  log
+}

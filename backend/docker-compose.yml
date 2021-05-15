@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+  caddy:
+    image: caddy:2.2.1
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # passing through from env
+      - BACKEND_SERVER_PROTOCOL
+      - BACKEND_SERVER
+    volumes:
+      - ~/docker-persistence/caddy:/data
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+  mongodb:
+    image: 'bitnami/mongodb:latest'
+    volumes:
+      - ~/docker-persistence:/bitnami/mongodb
+  parse:
+    image: 'parseplatform/parse-server'
+    environment:
+      #passing these variable through from shell environment
+      - PARSE_SERVER_APPLICATION_ID=${PARSE_APP_ID}
+      - PARSE_SERVER_MASTER_KEY=${PARSE_MASTER_KEY}
+      - PARSE_SERVER_DATABASE_URI=mongodb://mongodb:27017/parse
+      - PARSE_SERVER_START_LIVE_QUERY_SERVER=1
+      - PARSE_SERVER_CLOUD=//parse-server/cloud/main.js
+      - PARSE_SERVER_LIVE_QUERY=${PARSE_LIVEQUERY_CLASSES}
+    expose:
+      - "1337"
+    volumes:
+      - ./parse/cloud-code:/parse-server/cloud
+    depends_on:
+      - mongodb
+  # parse:
+  #   build: ./parse
+  #   environment:
+  #     - PARSE_SERVER_APPLICATION_ID=${PARSE_APP_ID}
+  #     - PARSE_SERVER_MASTER_KEY=${PARSE_MASTER_KEY}
+  #     - PARSE_SERVER_DATABASE_URI=mongodb://mongodb:27017/parse
+  #     - PARSE_SERVER_START_LIVE_QUERY_SERVER=${PARSE_START_LIVE_QUERY_SERVER}
+  #     - PARSE_SERVER_LIVE_QUERY=${PARSE_LIVEQUERY_CLASSES}
+  #     - PARSE_SERVER_URL=http://localhost:${PARSE_PORT}${PARSE_URL_PATH}
+  #     - PARSE_PORT
+  #     #passing these variable through from shell environment
+  #     - MSAL_AUTHORITY
+  #     - MSAL_OID_CONFIG_PATH
+  #   expose:
+  #     - "1337"
+  #   depends_on:
+  #     - mongodb
+  parse-dashboard:
+    image: parseplatform/parse-dashboard
+    ports:
+      - '4040:4040'
+    environment:
+      - PARSE_DASHBOARD_SERVER_URL=${BACKEND_SERVER_PROTOCOL}://${BACKEND_SERVER}/parse
+      # passing through from env
+      - PARSE_DASHBOARD_APP_ID=${PARSE_APP_ID}
+      - PARSE_DASHBOARD_MASTER_KEY=${PARSE_MASTER_KEY}
+      - PARSE_DASHBOARD_APP_NAME
+      - PARSE_DASHBOARD_ALLOW_INSECURE_HTTP=1
+      - PARSE_DASHBOARD_USER_ID=${PARSE_DASHBOARD_USER}
+      - PARSE_DASHBOARD_USER_PASSWORD=${PARSE_DASHBOARD_PASSWORD}
+    depends_on:
+      - parse
