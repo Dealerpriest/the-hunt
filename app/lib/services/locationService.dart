@@ -145,11 +145,8 @@ class LocationService {
           }
 
           Duration timeDifference = now.difference(hunterLocation.createdAt);
-          if(timeDifference > Duration(seconds: 5)){
-            return false;
-          }
-
-          if(closestHunterDistance < 50){
+          print('hunter prey time difference: ${timeDifference.inSeconds}');
+          if(timeDifference < Duration(seconds: 5) && closestHunterDistance < 50){
             print('CATCHED!!!!');
             ParseUser hunter = closestHunterLocation.get<ParseUser>('user');
             catchPrey(appState.gameSession.parseGameSession, hunter);
@@ -169,6 +166,11 @@ class LocationService {
             closestCheckpointDistance = distance;
           }
         });
+
+        if(closestCheckpointDistance < 5){
+          print('touching checkpoint: ${closestCheckpoint}');
+          appState.gameCheckpoints.touchCheckpoint(closestCheckpoint.objectId);
+        }
 
         double closestThing = math.min(closestHunterDistance, closestCheckpointDistance);
 
