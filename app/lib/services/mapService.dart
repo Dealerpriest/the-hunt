@@ -4,7 +4,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 
-import 'package:geodesy/geodesy.dart' as Geo;
+// import 'package:geodesy/geodesy.dart' as Geo;
+import 'package:latlong2/latlong.dart' as Geo;
 
 class MapService {
   /// SINGLETON PATTERN

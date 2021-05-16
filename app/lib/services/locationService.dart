@@ -8,7 +8,8 @@ import '../state/mainStore.dart';
 import './revealService.dart';
 import 'package:location/location.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
-import 'package:geodesy/geodesy.dart' as geo;
+// import 'package:geodesy/geodesy.dart' as geo;
+import 'package:latlong2/latlong.dart' as Geo;
 class LocationService {
   /// SINGLETON PATTERN
   static LocationService _instance;
@@ -31,11 +32,14 @@ class LocationService {
   PermissionStatus _permissionGranted;
   StreamSubscription _locationStreamSubscription = null;
   bool _streamStarted = false;
-  Duration _interval = Duration(milliseconds: 10000);
+  final Duration _fastInterval = Duration(milliseconds: 1000);
+  final Duration _slowInterval = Duration(milliseconds: 30000);
+  Duration _interval = Duration(milliseconds: 30000);
   LocationAccuracy _accuracy = LocationAccuracy.high;
 
-  geo.Geodesy _geodesy;
+  Geo.Distance _distance;
 
+  DateTime _onLocationUpdateTS = DateTime.now();
   DateTime _lastUsedRevealMoment = DateTime.now();
 
   _init() async {
@@ -61,7 +65,7 @@ class LocationService {
     _location.changeSettings(accuracy: _accuracy, interval: _interval.inMilliseconds, distanceFilter: 0);
     _location.enableBackgroundMode(enable: true);
 
-    _geodesy = geo.Geodesy();
+    _distance = Geo.Distance();
   }
 
   Future<LocationData> getCurrentLocation() {
@@ -71,11 +75,23 @@ class LocationService {
   void set locationInterval(Duration interval) {
     print('CHANGING LOCATION INTERVAL!!!!');
     _interval = interval;
-    _location.changeSettings(interval: _interval.inMilliseconds, distanceFilter: 1);
+    _location.changeSettings(interval: _interval.inMilliseconds, distanceFilter: 0).then((value) => print('changeSettings result: ${value}'));
   }
 
   Duration get locationInterval {
     return _interval;
+  }
+
+  setToFastInterval(){
+    if(locationInterval.compareTo(_fastInterval) != 0) {
+      locationInterval = _fastInterval;
+    }
+  }
+
+  setToSlowInterval(){
+    if(locationInterval.compareTo(_slowInterval) != 0) {
+      locationInterval = _slowInterval;
+    }
   }
 
   stopStream() async {
@@ -93,11 +109,16 @@ class LocationService {
       log('error:', error: 'Location stream already started!');
       return;
     }
-    // TODO: We seem to end up with many subscriptions when doing hot reloading.
+
+    // TODO: We seem to end up with many subscriptions when doing hot restart.
     // Could we somehow make sure we only have one stream running at the time?
     _locationStreamSubscription = _location.onLocationChanged.listen((LocationData currentLocation) {
-      print('location updated');
-      print('interval: ${locationInterval.inMilliseconds}ms');
+      print('gps location updated');
+      print('configured interval: ${locationInterval.inMilliseconds}ms');
+      Duration realInterval = DateTime.now().difference(_onLocationUpdateTS);
+      _onLocationUpdateTS = DateTime.now();
+      print('real interval: ${realInterval.inSeconds}');
+
       MainStore.getInstance().locations.onLocationChangedCounter++;
       // print(currentLocation);
       // print('shouldReveal:  ${_shouldBeRevealed()}');
@@ -106,12 +127,12 @@ class LocationService {
 
       var shouldReveal = _shouldBeRevealed(_lastUsedRevealMoment);
       if(shouldReveal){
-        print('PLAY SOUND!!!!');
+        print('PLAY REVEAL SOUND!!!!');
         // _lastUsedRevealMoment = RevealService().nextRevealMoment;
       }
-      sendLocationToParse(currentLocation, gameSession, user);
+      // sendLocationToParse(currentLocation, gameSession, user);
 
-      _checkDistances(currentLocation);
+      // _checkDistances(currentLocation);
     });
     _streamStarted = true;
     print('location stream started!!!');
@@ -124,7 +145,7 @@ class LocationService {
     try {
         // print('hello');
         var now = DateTime.now();
-        geo.LatLng currentPos = geo.LatLng(currentLocation.latitude, currentLocation.longitude);
+        Geo.LatLng currentPos = Geo.LatLng(currentLocation.latitude, currentLocation.longitude);
 
         var appState = MainStore.getInstance();
         var parseCheckpoints = appState.gameCheckpoints.parseGameCheckpoints;
@@ -136,8 +157,9 @@ class LocationService {
         
         hunterLocations.forEach((ParseObject hunterLocation) {
           ParseGeoPoint coords = hunterLocation.get<ParseGeoPoint>('coords');
-          geo.LatLng hunterCoords = geo.LatLng(coords.latitude, coords.longitude);
-          double distance = _geodesy.distanceBetweenTwoGeoPoints(currentPos, hunterCoords);
+          Geo.LatLng hunterCoords = Geo.LatLng(coords.latitude, coords.longitude);
+          // double distance = _geodesy.distanceBetweenTwoGeoPoints(currentPos, hunterCoords);
+          var distance = _distance(currentPos, hunterCoords);
 
           if(distance < closestHunterDistance) {
             closestHunterLocation = hunterLocation;
@@ -158,8 +180,8 @@ class LocationService {
         print('parseCheckPoints: ${parseCheckpoints}');
         parseCheckpoints.forEach((ParseObject checkpoint){
           ParseGeoPoint coords = checkpoint.get<ParseGeoPoint>('coords');
-          geo.LatLng checkpointCoord = geo.LatLng(coords.latitude, coords.longitude);
-          double distance = _geodesy.distanceBetweenTwoGeoPoints(currentPos, checkpointCoord);
+          Geo.LatLng checkpointCoord = Geo.LatLng(coords.latitude, coords.longitude);
+          double distance =_distance(currentPos, checkpointCoord);
 
           if(distance < closestCheckpointDistance){
             closestCheckpoint = checkpoint;
@@ -174,18 +196,20 @@ class LocationService {
 
         double closestThing = math.min(closestHunterDistance, closestCheckpointDistance);
 
-        if(closestThing < 200){
-          if(this.locationInterval > Duration(seconds: 5))
-            this.locationInterval = Duration(seconds: 1);
-        }else{
-          if(this.locationInterval < Duration(seconds: 5))
-            this.locationInterval = Duration(seconds: 30);
-        }
+        // if(closestThing < 200){
+        //   if(this.locationInterval > Duration(seconds: 5))
+        //     this.locationInterval = Duration(seconds: 1);
+        // }else{
+        //   if(this.locationInterval < Duration(seconds: 5))
+        //     this.locationInterval = Duration(seconds: 30);
+        // }
 
       } catch(err) {
         log('error', error: err);
       }
   }
+
+  // bool _isACatch()
 
   bool _shouldBeRevealed(DateTime lastUsedReveal){
     // Don't reveal hunters

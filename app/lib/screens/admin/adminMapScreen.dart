@@ -2,7 +2,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:geodesy/geodesy.dart' as Geo;
+// import 'package:geodesy/geodesy.dart' as Geo;
+import 'package:latlong2/latlong.dart' as Geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/services/mapService.dart';
@@ -44,7 +45,16 @@ class AdminMapScreen extends StatelessWidget {
           children: [
             FloatingActionButton(child: Icon(Icons.face), onPressed: ()async {
               LatLngBounds screenRegion = await mapService.mapControl.getVisibleRegion();
-              Geo.LatLng mapCenter = checkpointService.geodesy.midPointBetweenTwoGeoPoints(mapService.toGeoLatLng(screenRegion.northeast), mapService.toGeoLatLng(screenRegion.southwest));
+              Geo.LatLng ne = mapService.toGeoLatLng(screenRegion.northeast);
+              Geo.LatLng sw = mapService.toGeoLatLng(screenRegion.southwest);
+
+              Geo.Distance dst = new Geo.Distance();
+              double distance = dst.distance(ne, sw);
+              double bearing = dst.bearing(ne, sw);
+
+              Geo.LatLng mapCenter = dst.offset(ne, distance/2, bearing);
+
+              // Geo.LatLng mapCenter = checkpointService.geodesy.midPointBetweenTwoGeoPoints(mapService.toGeoLatLng(screenRegion.northeast), mapService.toGeoLatLng(screenRegion.southwest));
               var pickedCheckpoints = await checkpointService.selectGameCheckPoints(mapCenter, alternatives: adminState.checkpoints.allCheckpoints);
               adminState.checkpoints.pickedCheckpoints = pickedCheckpoints;
               // print('pressed da button');

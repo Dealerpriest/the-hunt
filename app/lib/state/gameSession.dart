@@ -4,7 +4,8 @@ import 'dart:developer';
 // import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:learning_flutter/services/checkpointService.dart';
 import 'package:learning_flutter/services/locationService.dart' as loc;
-import 'package:geodesy/geodesy.dart' as geo;
+// import 'package:geodesy/geodesy.dart' as geo;
+import 'package:latlong2/latlong.dart' as Geo;
 import 'package:learning_flutter/services/parseServerInteractions.dart';
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
@@ -228,7 +229,7 @@ abstract class _GameSession with Store {
     try {
       this.parseGameSession = await createGameSession(sessionName, playerName, startLocation);
       await _checkpointService.fetchAllCheckpoints();
-      geo.LatLng center = geo.LatLng(startLocation.latitude, startLocation.longitude);
+      Geo.LatLng center = Geo.LatLng(startLocation.latitude, startLocation.longitude);
       var pickedParseCheckpoints = await _checkpointService.selectGameCheckPoints(center);
       List<ParseObject> parseGameCheckpoints = await setCheckpointsForGameSession(this.parseGameSession, pickedParseCheckpoints);
       parent.gameCheckpoints.setGameCheckpoints(parseGameCheckpoints);

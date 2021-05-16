@@ -47,9 +47,14 @@ class GameScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Column(mainAxisAlignment: MainAxisAlignment.end,  children: [
-        // FloatingActionButton(child: Icon(Icons.add), onPressed: () => appState.map.generateSomeMarkers()),
+        FloatingActionButton(child: Icon(Icons.timer_10), onPressed: () => locationService.setToSlowInterval()),
+        FloatingActionButton(child: Icon(Icons.timer_3), onPressed: () => locationService.setToFastInterval()),
         SizedBox(height: 10),
-        FloatingActionButton(child: Icon(Icons.remove), onPressed: () => appState.locations.clearAllLocations(), heroTag: null,),
+        FloatingActionButton(child: Icon(Icons.stop_circle_outlined), onPressed: () => locationService.stopStream(), heroTag: null,),
+        FloatingActionButton(child: Icon(Icons.play_circle_outline_rounded), onPressed: () async {
+          ParseUser user = await appState.user.currentUser;
+          locationService.startStream(appState.gameSession.parseGameSession, user);
+          }, heroTag: null,),
         ],),
       bottomNavigationBar:
 
@@ -69,7 +74,7 @@ class GameScreen extends StatelessWidget {
             Text('past revealMoments: ${ appState.revealMoments.pastRevealMoments.length }'),
             Text('reveal in: ${appState.revealMoments.untilNextRevealMoment.inSeconds+1}'),
             Text('elapsed: ${appState.gameSession.elapsedGameTime.inSeconds}'),
-            Text('onLocationChanged: ${appState.locations.onLocationChangedCounter}'),            
+            Text('nr of gps callbacks: ${appState.locations.onLocationChangedCounter}'),            
             Text('parseLocations: ${appState.locations.allLocations.length}'),
             Text('allPreyLocations: ${appState.locations.allPreyLocations.length}'),
             Text('revealedlocations: ${appState.locations.revealedPreyLocations.length}'),

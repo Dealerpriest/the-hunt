@@ -5,7 +5,8 @@ import 'package:learning_flutter/services/parseServerInteractions.dart' as parse
 // import 'package:learning_flutter/state/admin/adminStore.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
-import 'package:geodesy/geodesy.dart';
+// import 'package:geodesy/geodesy.dart';
+import 'package:latlong2/latlong.dart' as Geo;
 
 class CheckpointService {
   /// SINGLETON PATTERN
@@ -24,14 +25,16 @@ class CheckpointService {
   }
   //// END SINGLETON PATTERN
 
-  Geodesy geodesy;
+  // Geodesy geodesy;
+  Geo.Distance _distance;
   List<ParseObject> allCheckpoints = new List<ParseObject>();
 
   
   // AdminStore adminState;
   
   _init(){
-    geodesy = Geodesy();
+    // geodesy = Geodesy();
+    _distance = new Geo.Distance();
     // adminState = AdminStore.getInstance();
     print('checkpoint service initialized');
   }
@@ -54,17 +57,19 @@ class CheckpointService {
     ParseGeoPoint coords1 = checkpoint1.get<ParseGeoPoint>('coords');
     ParseGeoPoint coords2 = checkpoint2.get<ParseGeoPoint>('coords');
     
-    LatLng pos1 = LatLng(coords1.latitude, coords1.longitude);
-    LatLng pos2 = LatLng(coords2.latitude, coords2.longitude);
+    Geo.LatLng pos1 = Geo.LatLng(coords1.latitude, coords1.longitude);
+    Geo.LatLng pos2 = Geo.LatLng(coords2.latitude, coords2.longitude);
 
-    return geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
+    return _distance(pos1, pos2);
+    // return geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
   }
 
-  List<Map> checkCheckpoints(LatLng pos, List<ParseObject> alternatives, { double minDistance = 10 }){
+  List<Map> checkCheckpoints(Geo.LatLng pos, List<ParseObject> alternatives, { double minDistance = 10 }){
     return alternatives.map((ParseObject checkpoint) {
       ParseGeoPoint coords = checkpoint.get<ParseGeoPoint>('coords');
-      LatLng checkpointCoord = LatLng(coords.latitude, coords.longitude);
-      double distance = geodesy.distanceBetweenTwoGeoPoints(pos, checkpointCoord);
+      Geo.LatLng checkpointCoord = Geo.LatLng(coords.latitude, coords.longitude);
+      // double _distance = geodesy.distanceBetweenTwoGeoPoints(pos, checkpointCoord);
+      double distance = _distance(pos, checkpointCoord);
 
       return {
         'objectId': checkpoint.objectId,
@@ -75,7 +80,7 @@ class CheckpointService {
     }).toList();
   }
 
-  Future<List<ParseObject>> selectGameCheckPoints(LatLng mapCenter, {List<ParseObject> alternatives, int minDistance = 2000}) {
+  Future<List<ParseObject>> selectGameCheckPoints(Geo.LatLng mapCenter, {List<ParseObject> alternatives, int minDistance = 2000}) {
     print('mapcenter is:');
     print(mapCenter);
 
@@ -126,12 +131,13 @@ class CheckpointService {
           var checkpoint2 = pickedCheckpoints[innerIdx];
 
           var geopoint1 = checkpoint1.get<ParseGeoPoint>('coords'); 
-          var pos1 = LatLng(geopoint1.latitude, geopoint1.longitude);
+          var pos1 = Geo.LatLng(geopoint1.latitude, geopoint1.longitude);
 
           var geopoint2 = checkpoint2.get<ParseGeoPoint>('coords'); 
-          var pos2 = LatLng(geopoint2.latitude, geopoint2.longitude);
+          var pos2 = Geo.LatLng(geopoint2.latitude, geopoint2.longitude);
 
-          var distance = geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
+          // var distance = geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
+          var distance = _distance(pos1, pos2);
           if(distance < minDistance){
             success = false;
             break;

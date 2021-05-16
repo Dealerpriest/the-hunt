@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:learning_flutter/state/mainStore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 import 'package:learning_flutter/services/parseServerInteractions.dart';
-import 'package:geodesy/geodesy.dart' as geo;
+// import 'package:geodesy/geodesy.dart' as geo;
+import 'package:latlong2/latlong.dart' as Geo;
 
 part 'locations.g.dart';
 
@@ -15,7 +18,7 @@ abstract class _Locations with Store {
   _Locations({this.parent});
   MainStore parent;
 
-  geo.Geodesy _geodesy = geo.Geodesy();
+  Geo.Distance _distance = Geo.Distance();
 
   @observable
   ObservableList<ParseObject> allLocations = new ObservableList<ParseObject>();
@@ -86,13 +89,19 @@ abstract class _Locations with Store {
   ObservableList<ParseObject> get revealedPreyLocations {
     // print('recalculating revealedPreyLocations');
 
-    var locations = parent.revealMoments.pastRevealMoments.map((DateTime revealMoment) {
-      return allPreyLocations.lastWhere((ParseObject preyLocation){
-        return preyLocation.createdAt.isBefore(revealMoment);
+    try {
+
+      var locations = parent.revealMoments.pastRevealMoments.map((DateTime revealMoment) {
+        return allPreyLocations.lastWhere((ParseObject preyLocation){
+          return preyLocation.createdAt.isBefore(revealMoment);
+        });
       });
-    });
-    
-    return locations.toList().asObservable();
+      
+      return locations.toList().asObservable();
+    } catch (err){
+      log('error', error: err);
+      return ObservableList();
+    }
   }
 
   @computed
@@ -159,11 +168,11 @@ abstract class _Locations with Store {
 
       var coords = location.get<ParseGeoPoint>('coords');
 
-      geo.LatLng pos1 = geo.LatLng(newCoords.latitude, newCoords.longitude);
-      geo.LatLng pos2 = geo.LatLng(coords.latitude, coords.longitude);
+      Geo.LatLng pos1 = Geo.LatLng(newCoords.latitude, newCoords.longitude);
+      Geo.LatLng pos2 = Geo.LatLng(coords.latitude, coords.longitude);
 
       
-      var distance = _geodesy.distanceBetweenTwoGeoPoints(pos1, pos2);
+      var distance = _distance(pos1, pos2);
       return distance < 10;
     }).toList();
   }
